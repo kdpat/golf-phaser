@@ -8,6 +8,9 @@ defmodule Golf.Users do
 
   alias Golf.Users.User
 
+  @default_username "anon"
+  def default_username, do: @default_username
+
   @doc """
   Returns the list of users.
 

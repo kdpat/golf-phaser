@@ -10,6 +10,7 @@ defmodule GolfWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :put_session_id
+    plug :put_user
   end
 
   pipeline :api do
