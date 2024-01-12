@@ -2,8 +2,7 @@ defmodule GolfWeb.PageController do
   use GolfWeb, :controller
 
   def home(conn, _params) do
-    # The home page is often custom made,
-    # so skip the default app layout.
-    render(conn, :home, layout: false)
+    IO.inspect(get_session(conn, :session_id), label: "SESSION ID")
+    render(conn, :home)
   end
 end

@@ -11,8 +11,7 @@ defmodule Golf.Application do
       GolfWeb.Telemetry,
       Golf.Repo,
       {Ecto.Migrator,
-        repos: Application.fetch_env!(:golf, :ecto_repos),
-        skip: skip_migrations?()},
+       repos: Application.fetch_env!(:golf, :ecto_repos), skip: skip_migrations?()},
       {DNSCluster, query: Application.get_env(:golf, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Golf.PubSub},
       # Start a worker by calling: Golf.Worker.start_link(arg)
