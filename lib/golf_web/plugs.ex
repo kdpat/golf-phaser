@@ -24,7 +24,7 @@ defmodule GolfWeb.Plugs do
     case Golf.Users.get_user(conn.assigns.session_id) do
       nil ->
         user_attrs = %{
-          session_id: conn.assigns.session_id,
+          id: conn.assigns.session_id,
           name: Golf.Users.default_username()
         }
 

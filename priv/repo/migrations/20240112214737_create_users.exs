@@ -3,7 +3,7 @@ defmodule Golf.Repo.Migrations.CreateUsers do
 
   def change do
     create table(:users, primary_key: false) do
-      add :session_id, :string, primary_key: true
+      add :id, :string, primary_key: true
       add :name, :string
 
       timestamps(type: :utc_datetime)

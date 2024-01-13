@@ -24,8 +24,8 @@ defmodule Golf.Users do
     Repo.all(User)
   end
 
-  def get_user(session_id) do
-    Repo.get_by(User, session_id: session_id)
+  def get_user(id) do
+    Repo.get_by(User, id: id)
   end
 
   @doc """

@@ -5,7 +5,7 @@ defmodule Golf.Users.User do
   @primary_key false
 
   schema "users" do
-    field :session_id, :string, primary_key: true
+    field :id, :string, primary_key: true
     field :name, :string
 
     timestamps(type: :utc_datetime)
@@ -14,7 +14,7 @@ defmodule Golf.Users.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:session_id, :name])
-    |> validate_required([:session_id, :name])
+    |> cast(attrs, [:id, :name])
+    |> validate_required([:id, :name])
   end
 end
