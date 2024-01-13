@@ -11,7 +11,7 @@ defmodule Golf.UsersFixtures do
     {:ok, user} =
       attrs
       |> Enum.into(%{
-        id: GolfWeb.Plugs.unique_session_id(),
+        session_id: GolfWeb.Plugs.unique_session_id(),
         name: "alice"
       })
       |> Golf.Users.create_user()

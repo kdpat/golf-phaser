@@ -8,7 +8,7 @@ defmodule Golf.GamesFixtures do
   Generate a game.
   """
   def game_fixture(attrs \\ %{}) do
-    {:ok, game} = Golf.Games.insert_game(attrs)
+    {:ok, game} = Golf.GamesDb.insert_game(attrs)
     game
   end
 end

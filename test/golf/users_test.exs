@@ -21,11 +21,11 @@ defmodule Golf.UsersTest do
     end
 
     test "create_user/1 with valid data creates a user" do
-      valid_attrs = %{name: "some name", id: "some session_id"}
+      valid_attrs = %{name: "some name", session_id: "some session_id"}
 
       assert {:ok, %User{} = user} = Users.create_user(valid_attrs)
       assert user.name == "some name"
-      assert user.id == "some session_id"
+      assert user.session_id == "some session_id"
     end
 
     test "create_user/1 with invalid data returns error changeset" do
@@ -34,11 +34,11 @@ defmodule Golf.UsersTest do
 
     test "update_user/2 with valid data updates the user" do
       user = user_fixture()
-      update_attrs = %{name: "some updated name", id: "some updated session_id"}
+      update_attrs = %{name: "some updated name", session_id: "some updated session_id"}
 
       assert {:ok, %User{} = user} = Users.update_user(user, update_attrs)
       assert user.name == "some updated name"
-      assert user.id == "some updated session_id"
+      assert user.session_id == "some updated session_id"
     end
 
     test "update_user/2 with invalid data returns error changeset" do

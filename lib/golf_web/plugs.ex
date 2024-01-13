@@ -21,10 +21,10 @@ defmodule GolfWeb.Plugs do
   end
 
   def put_user(conn, _opts) do
-    case Golf.Users.get_user(conn.assigns.session_id) do
+    case Golf.Users.get_user_by_session_id(conn.assigns.session_id) do
       nil ->
         user_attrs = %{
-          id: conn.assigns.session_id,
+          session_id: conn.assigns.session_id,
           name: Golf.Users.default_username()
         }
 

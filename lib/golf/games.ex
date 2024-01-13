@@ -1,134 +1,53 @@
 defmodule Golf.Games do
-  @moduledoc """
-  The Games context.
-  """
+  alias Golf.Games.Game
 
-  import Ecto.Query, warn: false
+  @card_names for rank <- ~w(A 2 3 4 5 6 7 8 9 T J Q K),
+                  suit <- ~w(C D H S),
+                  do: rank <> suit
 
-  alias Golf.Repo
-  alias Golf.Users.User
-  alias Golf.Games.{Game, Player}
+  @joker_name "jk"
+  @jokers_per_deck 2
+  @jokers List.duplicate(@joker_name, @jokers_per_deck)
 
-  @doc """
-  Returns the list of games.
-
-  ## Examples
-
-      iex> list_games()
-      [%Game{}, ...]
-
-  """
-  def list_games do
-    Repo.all(Game)
+  def new_deck(1) do
+    @card_names ++ @jokers
   end
 
-  @doc """
-  Gets a single game.
-
-  Raises `Ecto.NoResultsError` if the Game does not exist.
-
-  ## Examples
-
-      iex> get_game!(123)
-      %Game{}
-
-      iex> get_game!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_game!(id), do: Repo.get!(Game, id)
-
-  def get_game(id), do: Repo.get(Game, id)
-
-  def get_game(id, preloads) do
-    Repo.get(Game, id)
-    |> Repo.preload(preloads)
+  def new_deck(n) when n > 1 do
+    new_deck(1) ++ new_deck(n - 1)
   end
 
-  @doc """
-  Inserts a game.
+  def new_deck(), do: new_deck(1)
 
-  ## Examples
-
-      iex> insert_game(%{field: value})
-      {:ok, %Game{}}
-
-      iex> insert_game(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def insert_game(attrs \\ %{}) do
-    %Game{}
-    |> Game.changeset(attrs)
-    |> Repo.insert()
+  def deal_from([], _) do
+    {:error, :empty_deck}
   end
 
-  @doc """
-  Updates a game.
-
-  ## Examples
-
-      iex> update_game(game, %{field: new_value})
-      {:ok, %Game{}}
-
-      iex> update_game(game, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_game(%Game{} = game, attrs) do
-    game
-    |> Game.changeset(attrs)
-    |> Repo.update()
+  def deal_from(deck, n) when length(deck) < n do
+    {:error, :not_enough_cards}
   end
 
-  @doc """
-  Deletes a game.
-
-  ## Examples
-
-      iex> delete_game(game)
-      {:ok, %Game{}}
-
-      iex> delete_game(game)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_game(%Game{} = game) do
-    Repo.delete(game)
+  def deal_from(deck, n) do
+    {cards, deck} = Enum.split(deck, n)
+    {:ok, cards, deck}
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking game changes.
-
-  ## Examples
-
-      iex> change_game(game)
-      %Ecto.Changeset{data: %Game{}}
-
-  """
-  def change_game(%Game{} = game, attrs \\ %{}) do
-    Game.changeset(game, attrs)
+  def deal_from(deck) do
+    with {:ok, [card], deck} <- deal_from(deck, 1) do
+      {:ok, card, deck}
+    end
   end
 
-  def create_game(%User{} = host) do
-    player = %{user_id: host.id, turn: 0}
+  def current_round(%Game{rounds: [round | _]}), do: round
+  def current_round(_), do: nil
 
-    {:ok, game} =
-      %{host_id: host.id, players: [player]}
-      |> insert_game()
+  defguard rounds_full(game) when length(game.rounds) >= length(game.players)
 
-    Map.update!(game, :players, &Enum.map(&1, fn p -> Map.put(p, :user, host) end))
+  def current_state(%Game{rounds: [round | _]} = game)
+      when round.state == :over and rounds_full(game) do
+    :game_over
   end
 
-  def add_player(%Game{} = game, %User{} = user) do
-    player_turn = length(game.players)
-
-    {:ok, player} =
-      %Player{}
-      |> Player.changeset(%{user_id: user.id, turn: player_turn})
-      |> Repo.insert()
-
-    player = Map.put(player, :user, user)
-    Map.update!(game, :players, fn ps -> ps ++ [player] end)
-  end
+  def current_state(%Game{rounds: [round | _]}), do: round.state
+  def current_state(%Game{}), do: :no_round
 end

@@ -6,7 +6,7 @@ defmodule Golf.Games.Player do
     field :turn, :integer
 
     belongs_to :game, Golf.Games.Game
-    belongs_to :user, Golf.Users.User, type: :string
+    belongs_to :user, Golf.Users.User
 
     timestamps(type: :utc_datetime)
   end

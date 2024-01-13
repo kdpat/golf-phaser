@@ -1,0 +1,33 @@
+#!/bin/bash
+
+reset_dev_db() {
+    echo "Dropping db..."
+    mix ecto.drop
+    mix ecto.create
+    mix ecto.migrate
+    echo "============================================================"
+}
+
+reset_test_db() {
+    echo "Dropping test db..."
+    MIX_ENV=test mix ecto.drop
+    MIX_ENV=test mix ecto.create
+    MIX_ENV=test mix ecto.migrate
+    echo "============================================================"
+}
+
+case "$1" in
+    "reset-dev-db")
+        reset_db
+        ;;
+    "reset-test-db")
+        reset_test_db
+        ;;    
+    "reset-db")
+        reset_dev_db
+        reset_test_db
+        ;;
+    *)
+        echo "Invalid argument."
+        ;;
+esac
