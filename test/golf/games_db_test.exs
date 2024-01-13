@@ -1,12 +1,50 @@
 defmodule Golf.GamesDbTest do
   use Golf.DataCase
 
-  alias Golf.GamesDb
+  alias Golf.{Games, GamesDb}
+  alias Golf.Games.Event
 
   describe "games" do
-    # alias Golf.Games.Game
-
     import Golf.UsersFixtures
+
+    test "two player game" do
+      user0 = user_fixture()
+      game = GamesDb.create_game(user0)
+
+      user1 = user_fixture(%{name: "bob"})
+      {:ok, game} = GamesDb.add_player(game, user1)
+
+      found_game = GamesDb.get_game(game.id)
+      assert game == found_game
+
+      {:ok, game} = GamesDb.create_round(game)
+
+      found_game = GamesDb.get_game(game.id)
+      assert game == found_game
+
+      [p0, p1] = game.players
+      assert Games.can_act?(game, p0)
+      assert Games.can_act?(game, p1)
+
+      event = Event.new(p0.id, :flip, 0)
+      {:ok, game} = GamesDb.handle_event(game, event)
+
+      event = Event.new(p1.id, :discard, 0)
+      assert_raise FunctionClauseError, fn -> GamesDb.handle_event(game, event) end
+
+      event = Event.new(p1.id, :flip, 5)
+      {:ok, game} = GamesDb.handle_event(game, event)
+
+      found_game = GamesDb.get_game(game.id)
+      assert game == found_game
+
+      event = Event.new(p1.id, :flip, 4)
+      {:ok, game} = GamesDb.handle_event(game, event)
+#      |> dbg()
+    end
+  end
+end
+
     # import Golf.GamesFixtures
 
     # @invalid_attrs %{}
@@ -58,26 +96,3 @@ defmodule Golf.GamesDbTest do
     #   game = game_fixture(%{host_id: host.id})
     #   assert %Ecto.Changeset{} = GamesDb.change_game(game)
     # end
-
-    test "two player game" do
-      user0 = user_fixture()
-      game = GamesDb.create_game(user0)
-      # IO.inspect(game)
-
-      user1 = user_fixture(%{name: "bob"})
-      {:ok, game} = GamesDb.add_player(game, user1)
-      # IO.inspect(game)
-
-      found_game = GamesDb.get_game(game.id)
-      assert game == found_game
-      # IO.inspect(found_game)
-
-      {:ok, game} = GamesDb.create_round(game)
-      IO.inspect(game)
-
-      found_game = GamesDb.get_game(game.id)
-      assert game == found_game
-      IO.inspect(found_game)
-    end
-  end
-end

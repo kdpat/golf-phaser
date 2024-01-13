@@ -14,6 +14,14 @@ defmodule Golf.Games.Event do
     timestamps(type: :utc_datetime, updated_at: false)
   end
 
+  def new(player_id, action, hand_index \\ nil) do
+    %__MODULE__{
+      player_id: player_id,
+      action: action,
+      hand_index: hand_index
+    }
+  end
+
   def changeset(event, attrs \\ %{}) do
     event
     |> cast(attrs, [:round_id, :player_id, :action, :hand_index])

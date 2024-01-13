@@ -7,11 +7,12 @@ defmodule Golf.GamesDb do
 
   alias Golf.Repo
   alias Golf.Users.User
+  alias Golf.Games
   alias Golf.Games.{Game, Player, Round, Event}
 
   @players_query from(p in Player, order_by: p.turn)
-  @rounds_query from(r in Round, order_by: [desc: :inserted_at])
-  @events_query from(e in Event, order_by: [desc: :inserted_at])
+  @rounds_query from(r in Round, order_by: [desc: :id])
+  @events_query from(e in Event, order_by: [desc: :id])
 
   @game_preloads [
     players: {@players_query, [:user]},
@@ -72,7 +73,8 @@ defmodule Golf.GamesDb do
 
   def create_round(%Game{} = game) do
     round =
-      Round.new_changeset(game)
+      Games.new_round(game)
+      |> Round.changeset()
       |> Repo.insert!()
       |> Map.put(:events, [])
 
@@ -81,5 +83,45 @@ defmodule Golf.GamesDb do
 
   defp prepend_round(game, round) do
     Map.update!(game, :rounds, fn rs -> [round | rs] end)
+  end
+
+  def handle_event(%Game{rounds: []}, _event) do
+    {:error, :no_round}
+  end
+
+  def handle_event(%Game{rounds: [%Round{state: :round_over} | _]}, _event) do
+    {:error, :round_over}
+  end
+
+  def handle_event(%Game{rounds: [round | _]} = game, %Event{} = event) do
+    with {:ok, round} = handle_round_event(round, event) do
+      {:ok, replace_current_round(game, round)}      
+    end
+  end
+
+  defp replace_current_round(game, round) do
+    rounds = List.replace_at(game.rounds, 0, round)
+    Map.put(game, :rounds, rounds)
+  end
+
+  def handle_round_event(%Round{} = round, %Event{} = event) do
+    Repo.transaction(fn ->
+      event =
+        event
+        |> Event.changeset(%{round_id: round.id})
+        |> Repo.insert!()
+
+      round_changes = Games.round_changes(round, event)
+      
+      round
+      # |> Round.event_changeset(event)
+      |> Round.changeset(round_changes)
+      |> Repo.update!()
+      |> prepend_event(event)
+    end)
+  end
+
+  defp prepend_event(round, event) do
+    Map.put(round, :events, [event | round.events])    
   end
 end

@@ -26,6 +26,7 @@ defmodule Golf.Repo.Migrations.CreateGames do
       add :deck, {:array, :string}
       add :table_cards, {:array, :string}
       add :hands, :map
+      add :first_player_index, :integer
       timestamps(type: :utc_datetime)
     end
 
@@ -40,6 +41,5 @@ defmodule Golf.Repo.Migrations.CreateGames do
     end
 
     create index(:events, [:round_id])
-    create unique_index(:events, [:round_id, :player_id])
   end
 end
