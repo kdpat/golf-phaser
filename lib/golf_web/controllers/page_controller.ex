@@ -2,8 +2,11 @@ defmodule GolfWeb.PageController do
   use GolfWeb, :controller
 
   def home(conn, _params) do
-    # IO.inspect(conn.assigns.session_id, label: "session id")
-    # IO.inspect(conn.assigns.user, label: "user")
-    render(conn, :home)
+    render(conn, :home, page_title: "Home", token: get_csrf_token())
+  end
+
+  def create_game(conn, params) do
+    game = Golf.GamesDb.create_game(conn.assigns.user)
+    redirect(conn, to: ~p"/game/#{game.id}")
   end
 end

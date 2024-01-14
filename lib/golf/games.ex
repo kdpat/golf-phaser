@@ -77,7 +77,7 @@ defmodule Golf.Games do
   end
 
   defp maybe_flip_all(hand, true), do: flip_all(hand)
-  defp maybe_flip_all(hand, _), do: hand  
+  defp maybe_flip_all(hand, _), do: hand
 
   defp swap_card(hand, index, new_card) do
     old_card = Enum.at(hand, index)["name"]
@@ -149,7 +149,7 @@ defmodule Golf.Games do
     num_hand_cards = @hand_size * length(game.players)
     {:ok, hand_cards, deck} = deal_from(deck, num_hand_cards)
     hands = make_hands(hand_cards, game.players)
-    
+
     {:ok, table_cards, deck} = deal_from(deck, 1)
 
     %Round{

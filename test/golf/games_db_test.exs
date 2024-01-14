@@ -68,7 +68,7 @@ defmodule Golf.GamesDbTest do
       refute Games.can_act?(game, p0)
       assert Games.can_act?(game, p1)
 
-      assert game == GamesDb.get_game(game.id)      
+      assert game == GamesDb.get_game(game.id)
 
       round = Games.current_round(game) |> Map.drop([:events])
       dbg(round)
