@@ -40,7 +40,8 @@ defmodule Golf.GamesDbTest do
 
       event = Event.new(p1.id, :flip, 4)
       {:ok, game} = GamesDb.handle_event(game, event)
-#      |> dbg()
+      # Games.playable_cards(game, p1)
+      # |> dbg()
     end
   end
 end

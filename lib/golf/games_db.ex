@@ -114,7 +114,6 @@ defmodule Golf.GamesDb do
       round_changes = Games.round_changes(round, event)
       
       round
-      # |> Round.event_changeset(event)
       |> Round.changeset(round_changes)
       |> Repo.update!()
       |> prepend_event(event)

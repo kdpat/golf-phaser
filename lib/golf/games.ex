@@ -45,13 +45,13 @@ defmodule Golf.Games do
     Enum.count(hand, & &1["face_up?"])
   end
 
-  defp all_face_up?(hand) do
-    num_cards_face_up(hand) == @hand_size
-  end
+  # defp all_face_up?(hand) do
+  #   num_cards_face_up(hand) == @hand_size
+  # end
 
-  defp one_face_down?(hand) do
-    num_cards_face_up(hand) == @hand_size - 1
-  end
+  # defp one_face_down?(hand) do
+  #   num_cards_face_up(hand) == @hand_size - 1
+  # end
 
   def min_two_face_up?(hand) do
     num_cards_face_up(hand) >= 2
@@ -109,8 +109,8 @@ defmodule Golf.Games do
   end
 
   defp get_hand(round, player_id) do
-    id = Integer.to_string(player_id)
-    round.hands[id]    
+    id_str = Integer.to_string(player_id)
+    round.hands[id_str]
   end
 
   def update_hand(hands, player_id, update_fn) do
@@ -162,6 +162,36 @@ defmodule Golf.Games do
         rem(round.first_player_index + 1, num_players)
     end
   end
+
+  def playable_cards(%Game{rounds: [round | _]}, player) do
+    playable_cards_round(round, player)
+  end
+
+  def playable_cards_round(%Round{state: :flip_2} = round, player) do
+    hand = get_hand(round, player.id)
+
+    if num_cards_face_up(hand) < 2 do
+      face_down_cards(hand)
+    else
+      []
+    end
+  end
+
+  def playable_cards_round(round, player) do
+    if can_act_round?(round, player) do
+      hand = get_hand(round, player.id)
+      card_places(round.state, hand)
+    else
+      []
+    end
+  end
+
+  @take_card_places [:deck, :table]
+  @hold_card_places [:held, :hand_0, :hand_1, :hand_2, :hand_3, :hand_4, :hand_5]
+
+  defp card_places(:take, _), do: @take_card_places
+  defp card_places(:hold,  _), do: @hold_card_places
+  defp card_places(:flip, hand), do: face_down_cards(hand)
 
   def round_changes(%Round{state: :flip_2} = round, %Event{action: :flip} = event) do
     update_fn = &flip_card_at(&1, event.hand_index)
