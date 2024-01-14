@@ -95,7 +95,7 @@ defmodule Golf.GamesDb do
 
   def handle_event(%Game{rounds: [round | _]} = game, %Event{} = event) do
     with {:ok, round} = handle_round_event(round, event) do
-      {:ok, replace_current_round(game, round)}      
+      {:ok, replace_current_round(game, round)}
     end
   end
 
@@ -112,7 +112,7 @@ defmodule Golf.GamesDb do
         |> Repo.insert!()
 
       round_changes = Games.round_changes(round, event)
-      
+
       round
       |> Round.changeset(round_changes)
       |> Repo.update!()
@@ -121,6 +121,6 @@ defmodule Golf.GamesDb do
   end
 
   defp prepend_event(round, event) do
-    Map.put(round, :events, [event | round.events])    
+    Map.put(round, :events, [event | round.events])
   end
 end

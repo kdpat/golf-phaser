@@ -21,11 +21,13 @@ defmodule Golf.Repo.Migrations.CreateGames do
 
     create table(:rounds) do
       add :game_id, references(:games)
+      add :first_player_out_id, references(:players)
       add :state, :string
       add :turn, :integer
       add :deck, {:array, :string}
       add :table_cards, {:array, :string}
       add :hands, :map
+      add :held_card, :map
       add :first_player_index, :integer
       timestamps(type: :utc_datetime)
     end

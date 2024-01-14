@@ -40,60 +40,90 @@ defmodule Golf.GamesDbTest do
 
       event = Event.new(p1.id, :flip, 4)
       {:ok, game} = GamesDb.handle_event(game, event)
-      # Games.playable_cards(game, p1)
-      # |> dbg()
+
+      assert Games.can_act?(game, p0)
+      refute Games.can_act?(game, p1)
+
+      event = Event.new(p0.id, :flip, 1)
+      {:ok, game} = GamesDb.handle_event(game, event)
+
+      assert Games.can_act?(game, p0)
+      refute Games.can_act?(game, p1)
+
+      event = Event.new(p0.id, :take_deck)
+      {:ok, game} = GamesDb.handle_event(game, event)
+
+      assert Games.can_act?(game, p0)
+      refute Games.can_act?(game, p1)
+
+      event = Event.new(p0.id, :discard)
+      {:ok, game} = GamesDb.handle_event(game, event)
+
+      assert Games.can_act?(game, p0)
+      refute Games.can_act?(game, p1)
+
+      event = Event.new(p0.id, :flip, 2)
+      {:ok, game} = GamesDb.handle_event(game, event)
+
+      refute Games.can_act?(game, p0)
+      assert Games.can_act?(game, p1)
+
+      assert game == GamesDb.get_game(game.id)      
+
+      round = Games.current_round(game) |> Map.drop([:events])
+      dbg(round)
     end
   end
 end
 
-    # import Golf.GamesFixtures
+# import Golf.GamesFixtures
 
-    # @invalid_attrs %{}
+# @invalid_attrs %{}
 
-    # test "list_games/0 returns all games" do
-    #   host = user_fixture()
-    #   game = game_fixture(%{host_id: host.id})
-    #   assert GamesDb.list_games() == [game]
-    # end
+# test "list_games/0 returns all games" do
+#   host = user_fixture()
+#   game = game_fixture(%{host_id: host.id})
+#   assert GamesDb.list_games() == [game]
+# end
 
-    # # test "get_game!/1 returns the game with given id" do
-    # #   host = user_fixture()
-    # #   game = game_fixture(%{host_id: host.id})
-    # #   assert Games.get_game!(game.id) == game
-    # # end
+# # test "get_game!/1 returns the game with given id" do
+# #   host = user_fixture()
+# #   game = game_fixture(%{host_id: host.id})
+# #   assert Games.get_game!(game.id) == game
+# # end
 
-    # test "create_game/1 with valid data creates a game" do
-    #   user = user_fixture()
-    #   valid_attrs = %{host_id: user.id}
-    #   assert {:ok, %Game{} = _game} = GamesDb.insert_game(valid_attrs)
-    # end
+# test "create_game/1 with valid data creates a game" do
+#   user = user_fixture()
+#   valid_attrs = %{host_id: user.id}
+#   assert {:ok, %Game{} = _game} = GamesDb.insert_game(valid_attrs)
+# end
 
-    # test "create_game/1 with invalid data returns error changeset" do
-    #   assert {:error, %Ecto.Changeset{}} = GamesDb.insert_game(@invalid_attrs)
-    # end
+# test "create_game/1 with invalid data returns error changeset" do
+#   assert {:error, %Ecto.Changeset{}} = GamesDb.insert_game(@invalid_attrs)
+# end
 
-    # # test "update_game/2 with valid data updates the game" do
-    # #   game = game_fixture()
-    # #   update_attrs = %{state: :uncover}
+# # test "update_game/2 with valid data updates the game" do
+# #   game = game_fixture()
+# #   update_attrs = %{state: :uncover}
 
-    # #   assert {:ok, %Game{} = game} = Games.update_game(game, update_attrs)
-    # # end
+# #   assert {:ok, %Game{} = game} = Games.update_game(game, update_attrs)
+# # end
 
-    # # # test "update_game/2 with invalid data returns error changeset" do
-    # # #   game = game_fixture()
-    # # #   assert {:error, %Ecto.Changeset{}} = Games.update_game(game, @invalid_attrs)
-    # # #   assert game == Games.get_game!(game.id)
-    # # # end
+# # # test "update_game/2 with invalid data returns error changeset" do
+# # #   game = game_fixture()
+# # #   assert {:error, %Ecto.Changeset{}} = Games.update_game(game, @invalid_attrs)
+# # #   assert game == Games.get_game!(game.id)
+# # # end
 
-    # test "delete_game/1 deletes the game" do
-    #   host = user_fixture()
-    #   game = game_fixture(%{host_id: host.id})
-    #   assert {:ok, %Game{}} = GamesDb.delete_game(game)
-    #   #assert_raise Ecto.NoResultsError, fn -> Games.get_game(game.id) end
-    # end
+# test "delete_game/1 deletes the game" do
+#   host = user_fixture()
+#   game = game_fixture(%{host_id: host.id})
+#   assert {:ok, %Game{}} = GamesDb.delete_game(game)
+#   #assert_raise Ecto.NoResultsError, fn -> Games.get_game(game.id) end
+# end
 
-    # test "change_game/1 returns a game changeset" do
-    #   host = user_fixture()
-    #   game = game_fixture(%{host_id: host.id})
-    #   assert %Ecto.Changeset{} = GamesDb.change_game(game)
-    # end
+# test "change_game/1 returns a game changeset" do
+#   host = user_fixture()
+#   game = game_fixture(%{host_id: host.id})
+#   assert %Ecto.Changeset{} = GamesDb.change_game(game)
+# end
