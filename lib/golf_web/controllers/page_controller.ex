@@ -5,7 +5,7 @@ defmodule GolfWeb.PageController do
     render(conn, :home, page_title: "Home", token: get_csrf_token())
   end
 
-  def create_game(conn, params) do
+  def create_game(conn, _params) do
     game = Golf.GamesDb.create_game(conn.assigns.user)
     redirect(conn, to: ~p"/game/#{game.id}")
   end

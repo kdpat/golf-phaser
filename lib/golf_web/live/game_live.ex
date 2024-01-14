@@ -7,6 +7,7 @@ defmodule GolfWeb.GameLive do
     ~H"""
     <div class="game">
       <h2>Game <%= @game_id %></h2>
+      <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
     </div>
     """
   end
