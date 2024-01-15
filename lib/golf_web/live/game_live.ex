@@ -17,9 +17,8 @@ defmodule GolfWeb.GameLive do
 
   @impl true
   def mount(%{"id" => id}, session, socket) do
+    user = Golf.Users.get_user_by_session_id(session["session_id"])
     game_id = String.to_integer(id)
-    session_id = session["session_id"]
-    user = Golf.Users.get_user_by_session_id(session_id)
 
     if connected?(socket) do
       send(self(), {:load_game, game_id})

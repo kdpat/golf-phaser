@@ -168,7 +168,7 @@ defmodule Golf.Games do
     |> Enum.map(fn name -> %{"name" => name, "face_up?" => false} end)
     |> Enum.chunk_every(@hand_size)
     |> Enum.zip(player_str_ids(players))
-    |> Enum.reduce(%{}, fn {hand, id}, acc -> Map.put(acc, id, hand) end)
+    |> Enum.reduce(%{}, fn {hand, player_id}, acc -> Map.put(acc, player_id, hand) end)
   end
 
   defp player_str_ids(players) do
@@ -285,7 +285,7 @@ defmodule Golf.Games do
     {hands, _} = update_hand(round, event.player_id, &flip_all/1)
 
     {state, turn} =
-      if Enum.all?(hands, &all_face_up?/1) do
+      if Enum.all?(Map.values(hands), &all_face_up?/1) do
         {:round_over, round.turn}
       else
         {:take, round.turn + 1}
@@ -343,7 +343,7 @@ defmodule Golf.Games do
 
     {state, turn, first_player_out_id} =
       cond do
-        Enum.all?(hands, &all_face_up?/1) ->
+        Enum.all?(Map.values(hands), &all_face_up?/1) ->
           {:round_over, round.turn, round.first_player_out_id || event.player_id}
 
         all_face_up?(hand) ->

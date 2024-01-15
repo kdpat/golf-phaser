@@ -29,6 +29,7 @@ export class GolfScene extends Phaser.Scene {
     EMITTER.on("game_loaded", this.onGameLoad, this);
     EMITTER.on("round_started", this.onRoundStart, this);
     EMITTER.on("game_event", this.onGameEvent, this);
+
     EMITTER.emit("golf_scene_ready");
   }
 
@@ -85,16 +86,29 @@ export class GolfScene extends Phaser.Scene {
       const img = this.addCard(cardName, x, y, rotation);
       this.cards.hands[player.position][index] = img;
 
-      if (player.id === this.golfGame.playerId
-        && isPlayable(this.golfGame, `hand_${index}`)) {
-        makePlayable(img, () => this.onHandClick(player.id, index));
+      if (isPlayable(this.golfGame, `hand_${index}`)) {
+        makePlayable(img, () => this.onHandClick(index));
       }
     });
   }
 
   addHeldCard(player) {
-    const showCard = player.id === this.golfGame.playerId;
-    const img = this.addCard()
+    const cardName = player.id === this.golfGame.playerId
+      ? player.held_card
+      : DOWN_CARD;
+
+    const { x, y, rotation } = heldCardCoord(GAME_WIDTH, GAME_HEIGHT, player.position);
+    const img = this.addCard(cardName, x, y, rotation);
+    this.cards.held = img;
+
+    const tableImg = this.cards.table[0];
+
+    if (tableImg && isPlayable(this.golfGame, "held")) {
+      // originally the user clicked on the held card to send a discard event
+      // it feels more natural to click the table instead, so we'll set up the handler on that image
+      // the tableImg will call onTableClick when "table" is in playableCards, and onHeldClick when "held" is in playableCards
+      makePlayable(tableImg, () => this.onHeldClick());
+    }
   }
 
   // server events
@@ -108,6 +122,11 @@ export class GolfScene extends Phaser.Scene {
 
       for (const player of game.players) {
         this.addHand(player);
+        console.log("p", player)
+
+        if (player.held_card) {
+          this.addHeldCard(player);
+        }
       }
     }
 
@@ -140,23 +159,27 @@ export class GolfScene extends Phaser.Scene {
   }
 
   onGameEvent(game, event) {
+    const player = game.players.find(p => p.id === event.player_id);
+    if (!player) throw new Error("null player");
+
     switch (event.action) {
       case "flip":
-        this.onFlip(game, event);
+        this.onFlip(game, player, event);
+        break;
+      case "take_deck":
+        this.onTakeDeck(game, player, event);
         break;
     }
 
     this.golfGame = game;
   }
 
-  onFlip(game, event) {
+  onFlip(game, player, event) {
     console.log("on flip");
-    const player = game.players.find(p => p.id === event.player_id);
-    if (!player) throw new Error("null player");
-
-    const cardName = player.hand[event.hand_index]["name"];
     const handImages = this.cards.hands[player.position];
     const cardImg = handImages[event.hand_index];
+
+    const cardName = player.hand[event.hand_index]["name"];
     cardImg.setTexture(cardName);
 
     handImages.forEach((img, i) => {
@@ -174,19 +197,43 @@ export class GolfScene extends Phaser.Scene {
     }
   }
 
+  onTakeDeck(game, player, event) {
+    this.golfGame = game;
+    this.addHeldCard(player);
+
+    if (player.id === this.golfGame.playerId) {
+      makeUnplayable(this.cards.deck);
+
+      if (this.cards.table[0]) {
+        makePlayable(this.cards.table[0], () => this.onTableClick());
+      }
+
+      const hand = this.cards.hands[player.position];
+      hand.forEach((img, i) => makePlayable(img, () => this.onHandClick(i)));
+    }
+  }
+
   // client events
 
   onDeckClick() {
     console.log("deck click")
+    this.pushEvent("card_click", {
+      playerId: this.golfGame.playerId,
+      place: "deck"
+    });
   }
 
   onTableClick() {
     console.log("table click")
+    this.pushEvent("card_click", {
+      playerId: this.golfGame.playerId,
+      place: "table",
+    });
   }
 
-  onHandClick(playerId, handIndex) {
+  onHandClick(handIndex) {
     this.pushEvent("card_click", {
-      playerId,
+      playerId: this.golfGame.playerId,
       handIndex,
       place: "hand",
     });
@@ -194,6 +241,10 @@ export class GolfScene extends Phaser.Scene {
 
   onHeldClick() {
     console.log("held click")
+    this.pushEvent("card_click", {
+      playerId: this.golfGame.playerId,
+      place: "held",
+    });
   }
 
   sendStartRound() {
@@ -243,7 +294,7 @@ function isPlayable(game, cardPlace) {
 }
 
 function makePlayable(cardImg, callback) {
-  cardImg.setTint(0xadd8e6);
+  cardImg.setTint(0x00ffff);
   cardImg.setInteractive({ cursor: "pointer" });
   cardImg.on("pointerdown", () => callback(cardImg));
 }

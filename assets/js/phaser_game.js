@@ -4,7 +4,8 @@ import { GolfScene } from "./scenes/golf_scene.js";
 import { GAME_WIDTH, GAME_HEIGHT } from "./game.js";
 
 const PARENT_ID = "game-canvas";
-const CANVAS = document.getElementById("game-canvas-canvas")
+const CANVAS_ID = "game-canvas-canvas";
+const CANVAS = document.getElementById(CANVAS_ID)
 
 const config = {
   type: Phaser.WEBGL,

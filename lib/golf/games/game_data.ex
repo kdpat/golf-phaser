@@ -84,7 +84,7 @@ defmodule Golf.Games.GameData do
 
   defp maybe_put_held_card(player, %{"player_id" => card_owner} = card)
        when player.id == card_owner do
-    %{player | heldCard: card["name"]}
+    %{player | held_card: card["name"]}
   end
 
   defp maybe_put_held_card(player, _), do: player

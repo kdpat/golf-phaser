@@ -3,6 +3,7 @@ import * as Phaser from "../vendor/phaser.min.js";
 export const EMITTER = new Phaser.Events.EventEmitter();
 
 export const CARD_SCALE = 0.25;
+
 export const CARD_IMG_WIDTH = 242;
 export const CARD_IMG_HEIGHT = 338;
 
@@ -38,7 +39,7 @@ export function cardPath(name) {
   return `/images/cards/${name}.svg`;
 }
 
-export const BG_COLOR = 2263842;
+export const BG_COLOR = 0x228b22;
 
 export const GAME_WIDTH = 600;
 export const GAME_HEIGHT = 600;
