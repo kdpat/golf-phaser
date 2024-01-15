@@ -21,7 +21,9 @@ defmodule GolfWeb.GameLive do
     session_id = session["session_id"]
     user = Golf.Users.get_user_by_session_id(session_id)
 
-    send(self(), {:load_game, game_id})
+    if connected?(socket) do
+      send(self(), {:load_game, game_id})
+    end
 
     {:ok,
      socket

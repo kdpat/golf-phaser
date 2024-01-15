@@ -3,14 +3,14 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import "../css/app.css"
-import { createPhaserGame, EMITTER } from "./golf_scene.js"
+import { createPhaserGame } from "./phaser_game.js"
+import { EMITTER } from "./game.js"
 
 const hooks = {};
-let phaserGame;
 
 hooks.GameCanvas = {
   mounted() {
-    phaserGame = createPhaserGame(this.pushEvent.bind(this));
+    createPhaserGame(this.pushEvent.bind(this));
 
     this.handleEvent("game_loaded", data => {
       console.log("game loaded", data);
