@@ -8,7 +8,6 @@ defmodule Golf.Games.GameData do
   @derive Jason.Encoder
   defstruct [
     :id,
-    :userId,
     :hostId,
     :turn,
     :state,
@@ -16,6 +15,7 @@ defmodule Golf.Games.GameData do
     :tableCards,
     :players,
     :playerId,
+    :userIsHost,
     :playableCards
   ]
 
@@ -42,7 +42,6 @@ defmodule Golf.Games.GameData do
 
     %__MODULE__{
       id: game.id,
-      userId: user.id,
       hostId: game.host_id,
       turn: round && round.turn,
       state: Games.current_state(game),
@@ -50,6 +49,7 @@ defmodule Golf.Games.GameData do
       tableCards: round && round.table_cards,
       players: players,
       playerId: player && player.id,
+      userIsHost: user.id == game.host_id,
       playableCards: playable_cards
     }
   end

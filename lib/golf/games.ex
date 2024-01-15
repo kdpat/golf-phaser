@@ -377,7 +377,6 @@ defmodule Golf.Games do
 
   defp rank_value(rank) when is_integer(rank) do
     case rank do
-      # joker
       ?j -> -2
       ?K -> 0
       ?A -> 1

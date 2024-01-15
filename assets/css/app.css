@@ -7,10 +7,16 @@ html,
 body {
   height: 100%;
   text-align: center;
+  /* background-color: #228b22; */
+}
+
+header {
+  height: 1.5rem;
+  /* background-color: #228b22; */
 }
 
 #game-canvas {
-  width: 95vw;
-  height: 92vh;
-  margin: auto;
+  width: 100vw;
+  height: calc(98vh - 1.5rem);
+  /* margin: auto; */
 }

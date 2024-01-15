@@ -1,5 +1,6 @@
 defmodule GolfWeb.GameLive do
   use GolfWeb, :live_view
+
   alias Golf.{GamesDb}
   alias Golf.Games.GameData
 
@@ -14,11 +15,15 @@ defmodule GolfWeb.GameLive do
 
   @impl true
   def mount(%{"id" => id}, session, socket) do
+    game_id = String.to_integer(id)
     session_id = session["session_id"]
     user = Golf.Users.get_user_by_session_id(session_id)
-    game_id = String.to_integer(id)
+
     send(self(), {:load_game, game_id})
-    {:ok, assign(socket, page_title: "Game", user: user, game_id: game_id, game: nil)}
+
+    {:ok,
+     socket
+     |> assign(page_title: "Game", user: user, game_id: game_id, game: nil)}
   end
 
   @impl true
@@ -52,7 +57,8 @@ defmodule GolfWeb.GameLive do
   end
 
   @impl true
-  def handle_event("start_round", _params, socket) do
+  def handle_event("start_round", _params, socket)
+      when socket.assigns.user.id == socket.assigns.game.host_id do
     {:ok, game} = GamesDb.create_round(socket.assigns.game)
     broadcast!(topic(game.id), {:round_started, game})
     {:noreply, socket}
