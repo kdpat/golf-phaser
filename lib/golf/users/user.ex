@@ -2,6 +2,7 @@ defmodule Golf.Users.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, only: [:id, :name]}
   schema "users" do
     field :session_id, :string
     field :name, :string

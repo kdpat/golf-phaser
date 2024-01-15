@@ -1,12 +1,12 @@
 defmodule GolfWeb.GameLive do
   use GolfWeb, :live_view
-  alias Golf.GamesDb
+  alias Golf.{GamesDb}
+  alias Golf.Games.GameData
 
   @impl true
   def render(assigns) do
     ~H"""
     <div class="game">
-      <h2>Game <%= @game_id %></h2>
       <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
     </div>
     """
@@ -31,7 +31,40 @@ defmodule GolfWeb.GameLive do
          |> put_flash(:error, "Game #{id} not found.")}
 
       game ->
-        {:noreply, assign(socket, game: game)}
+        subscribe!(topic(game.id))
+        data = GameData.new(game, socket.assigns.user)
+
+        {:noreply,
+         socket
+         |> assign(game: game)
+         |> push_event("game_loaded", %{"game" => data})}
     end
+  end
+
+  @impl true
+  def handle_info({:round_started, game}, socket) do
+    data = GameData.new(game, socket.assigns.user)
+
+    {:noreply,
+     socket
+     |> assign(game: game)
+     |> push_event("round_started", %{"game" => data})}
+  end
+
+  @impl true
+  def handle_event("start_round", _params, socket) do
+    {:ok, game} = GamesDb.create_round(socket.assigns.game)
+    broadcast!(topic(game.id), {:round_started, game})
+    {:noreply, socket}
+  end
+
+  defp topic(game_id), do: "game:#{game_id}"
+
+  defp subscribe!(topic) do
+    :ok = Phoenix.PubSub.subscribe(Golf.PubSub, topic)
+  end
+
+  defp broadcast!(topic, msg) do
+    Phoenix.PubSub.broadcast!(Golf.PubSub, topic, msg)
   end
 end

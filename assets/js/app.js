@@ -1,25 +1,40 @@
 import "phoenix_html"
-import {Socket} from "phoenix"
-import {LiveSocket} from "phoenix_live_view"
+import { Socket } from "phoenix"
+import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import "../css/app.css"
-import {createPhaserGame, EMITTER} from "./golf_scene.js"
+import { createPhaserGame, EMITTER } from "./golf_scene.js"
 
 const hooks = {};
+let phaserGame;
 
 hooks.GameCanvas = {
   mounted() {
-    console.log("mounted game canvas");
-    const phaserGame = createPhaserGame();
-    // setTimeout(() => EMITTER.emit("foo"), 500)
+    phaserGame = createPhaserGame(this.pushEvent.bind(this));
+
+    this.handleEvent("game_loaded", data => {
+      console.log("event game loaded", data);
+      EMITTER.once("scene_ready", () => {
+        EMITTER.emit("game_loaded", data.game);
+      });
+    });
+
+    this.handleEvent("round_started", data => {
+      console.log("round started", data);
+    });
   }
 }
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {hooks, params: {_csrf_token: csrfToken}})
+
+let liveSocket = new LiveSocket(
+  "/live",
+  Socket,
+  { hooks, params: { _csrf_token: csrfToken } }
+);
 
 // Show progress bar on live navigation and form submits
-topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
+topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
@@ -31,5 +46,3 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
-
-console.log("hello golf");
