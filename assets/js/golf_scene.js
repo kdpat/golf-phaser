@@ -1,11 +1,14 @@
-import * as Phaser from "../vendor/phaser.js";
+import * as Phaser from "../vendor/phaser.min.js";
 import { cardPath, CARD_NAMES, DOWN_CARD, CARD_SCALE, CARD_WIDTH, DECK_TABLE_OFFSET } from "./game.js";
 import { deckCoord, tableCoord, handCardCoord, heldCardCoord } from "./coords.js";
 
 export const EMITTER = new Phaser.Events.EventEmitter();
 
 const PARENT_ID = "game-canvas";
-const BG_COLOR = "#228b22";
+const CANVAS = document.getElementById("game-canvas-canvas")
+
+const BG_COLOR = 0x228b22;
+
 const WIDTH = 600;
 const HEIGHT = 600;
 
@@ -24,14 +27,12 @@ class GolfScene extends Phaser.Scene {
     };
   }
 
-  init(data) {
-    this.pushEvent = data.pushEvent;
+  preload() {
+    this.cameras.main.setBackgroundColor(BG_COLOR);
   }
 
-  preload() {
-    for (const card of CARD_NAMES) {
-      this.load.image(card, cardPath(card));
-    }
+  init(data) {
+    this.pushEvent = data.pushEvent;
   }
 
   create() {
@@ -93,8 +94,6 @@ class GolfScene extends Phaser.Scene {
   // server events
 
   onGameLoad(game) {
-    console.log("game loaded", game);
-
     this.golfGame = game;
     this.addDeck(game.state);
 
@@ -112,7 +111,6 @@ class GolfScene extends Phaser.Scene {
   }
 
   onRoundStart(game) {
-    console.log("round started", game);
     this.golfGame = game;
 
     if (this.startButtonBg) {
@@ -231,32 +229,61 @@ class GolfScene extends Phaser.Scene {
   }
 }
 
+class LoadingScene extends Phaser.Scene {
+  constructor() {
+    super({ key: "LoadingScene" });
+  }
+
+  init(data) {
+    this.pushEvent = data.pushEvent;
+  }
+
+  preload() {
+    this.cameras.main.setBackgroundColor(BG_COLOR);
+
+    for (const card of CARD_NAMES) {
+      this.load.image(card, cardPath(card));
+    }
+
+    this.loadingText = this.add.text(WIDTH / 2, HEIGHT / 2, 'Loading...', {
+      font: '32px monospace',
+      fill: '#ffffff'
+    }).setOrigin(0.5, 0.5);
+  }
+
+  create() {
+    this.scene.start("GolfScene", { pushEvent: this.pushEvent });
+  }
+}
+
 const config = {
-  type: Phaser.AUTO,
-  parent: PARENT_ID,
+  type: Phaser.WEBGL,
+  canvas: CANVAS,
   width: WIDTH,
   height: HEIGHT,
-  backgroundColor: BG_COLOR,
-  scene: GolfScene,
+  transparent: true,
+  scene: [LoadingScene, GolfScene],
   scale: {
+    parent: PARENT_ID,
     mode: Phaser.Scale.FIT,
     // mode: Phaser.Scale.RESIZE_ALL,
     // autoCenter: Phaser.Scale.CENTER_BOTH,
-    parent: PARENT_ID,
   },
 };
 
 export function createPhaserGame(pushEvent) {
   const game = new Phaser.Game(config);
-  game.scene.start("GolfScene", { pushEvent });
+  game.scene.start("LoadingScene", { pushEvent });
 }
 
 function makePlayable(cardImg, callback) {
+  cardImg.setTint(0xadd8e6);
   cardImg.setInteractive();
   cardImg.on("pointerdown", () => callback(cardImg));
 }
 
 function makeUnplayable(cardImg) {
+  cardImg.clearTint();
   cardImg.off("pointerdown");
   cardImg.removeInteractive();
 }

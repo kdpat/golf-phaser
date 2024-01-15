@@ -13,7 +13,7 @@ hooks.GameCanvas = {
     phaserGame = createPhaserGame(this.pushEvent.bind(this));
 
     this.handleEvent("game_loaded", data => {
-      console.log("event game loaded", data);
+      console.log("game loaded", data);
       EMITTER.once("golf_scene_ready", () => EMITTER.emit("game_loaded", data.game));
     });
 
@@ -26,7 +26,6 @@ hooks.GameCanvas = {
       console.log("game event", data);
       EMITTER.emit("game_event", data.game, data.event);
     });
-
   }
 }
 

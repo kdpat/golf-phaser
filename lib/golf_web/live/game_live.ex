@@ -8,7 +8,9 @@ defmodule GolfWeb.GameLive do
   def render(assigns) do
     ~H"""
     <div class="game">
-      <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
+      <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore">
+        <canvas id="game-canvas-canvas"></canvas>
+      </div>
     </div>
     """
   end

@@ -20,3 +20,9 @@ header {
   height: calc(98vh - 1.5rem);
   /* margin: auto; */
 }
+
+/* #game-canvas-canvas {
+  background-color: #228b22;
+  width: 90%;
+  height: 90%;
+} */
