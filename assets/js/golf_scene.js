@@ -6,7 +6,6 @@ export const EMITTER = new Phaser.Events.EventEmitter();
 
 const PARENT_ID = "game-canvas";
 const BG_COLOR = "#228b22";
-
 const WIDTH = 600;
 const HEIGHT = 600;
 
@@ -15,15 +14,13 @@ class GolfScene extends Phaser.Scene {
     super({ key: "GolfScene" });
 
     this.cards = {
-      deck: null,
       table: [],
-      hand: {
+      hands: {
         bottom: [],
         left: [],
         top: [],
         right: [],
       },
-      held: null,
     };
   }
 
@@ -40,8 +37,11 @@ class GolfScene extends Phaser.Scene {
   create() {
     EMITTER.on("game_loaded", this.onGameLoad, this);
     EMITTER.on("round_started", this.onRoundStart, this);
+    EMITTER.on("game_event", this.onGameEvent, this);
     EMITTER.emit("golf_scene_ready");
   }
+
+  // card sprites
 
   addCard(cardName, x, y, angle = 0) {
     const img = this.add.image(x, y, cardName)
@@ -72,26 +72,29 @@ class GolfScene extends Phaser.Scene {
     }
 
     if (card0) {
-      this.cards.table[0] = this.addTableCard(card0);
+      const img = this.addTableCard(card0);
+      this.cards.table[0] = img;
     }
   }
 
   addHand(player) {
-    player.hand.forEach((card, i) => {
+    player.hand.forEach((card, index) => {
       const cardName = card["face_up?"] ? card.name : DOWN_CARD;
-      const { x, y, rotation } = handCardCoord(WIDTH, HEIGHT, player.position, i);
-      const image = this.addCard(cardName, x, y, rotation);
-      this.cards.hand[player.position][i] = image;
+      const { x, y, rotation } = handCardCoord(WIDTH, HEIGHT, player.position, index);
+      const img = this.addCard(cardName, x, y, rotation);
+      this.cards.hands[player.position][index] = img;
+
+      if (player.id === this.golfGame.playerId && this.isPlayable(this.golfGame, `hand_${index}`)) {
+        makePlayable(img, () => this.onHandClick(player.id, index));
+      }
     });
   }
 
-  sendStartRound() {
-    console.log("starting game...");
-    this.pushEvent("start_round");
-  }
+  // server events
 
   onGameLoad(game) {
     console.log("game loaded", game);
+
     this.golfGame = game;
     this.addDeck(game.state);
 
@@ -131,6 +134,69 @@ class GolfScene extends Phaser.Scene {
       }
     });
   }
+
+  onGameEvent(game, event) {
+    switch (event.action) {
+      case "flip":
+        this.onFlip(game, event);
+        break;
+    }
+
+    this.golfGame = game;
+  }
+
+  onFlip(game, event) {
+    console.log("on flip");
+    const player = game.players.find(p => p.id === event.player_id);
+    if (!player) throw new Error("null player");
+
+    const cardName = player.hand[event.hand_index]["name"];
+    const handImages = this.cards.hands[player.position];
+    const cardImg = handImages[event.hand_index];
+    cardImg.setTexture(cardName);
+
+    handImages.forEach((img, i) => {
+      if (!this.isPlayable(game, `hand_${i}`)) {
+        console.log("making unplayable", i, game.playableCards)
+        makeUnplayable(img);
+      }
+    });
+  }
+
+  // client events
+
+  onDeckClick() {
+    console.log("deck click")
+  }
+
+  onTableClick() {
+    console.log("table click")
+  }
+
+  onHandClick(playerId, handIndex) {
+    this.pushEvent("card_click", {
+      playerId,
+      handIndex,
+      place: "hand",
+    });
+  }
+
+  onHeldClick() {
+    console.log("held click")
+  }
+
+  sendStartRound() {
+    console.log("starting game...");
+    this.pushEvent("start_round");
+  }
+
+  // util
+
+  isPlayable(game, cardPlace) {
+    return game.playableCards.includes(cardPlace);
+  }
+
+  // ui
 
   createStartGameButton() {
     const width = 150;

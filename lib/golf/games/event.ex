@@ -4,6 +4,7 @@ defmodule Golf.Games.Event do
 
   @actions [:take_deck, :take_table, :swap, :discard, :flip]
 
+  @derive {Jason.Encoder, only: [:player_id, :action, :hand_index]}
   schema "events" do
     field :action, Ecto.Enum, values: @actions
     field :hand_index, :integer

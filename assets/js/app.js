@@ -21,6 +21,12 @@ hooks.GameCanvas = {
       console.log("round started", data);
       EMITTER.emit("round_started", data.game);
     });
+
+    this.handleEvent("game_event", data => {
+      console.log("game event", data);
+      EMITTER.emit("game_event", data.game, data.event);
+    });
+
   }
 }
 
