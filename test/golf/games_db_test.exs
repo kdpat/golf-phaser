@@ -26,6 +26,10 @@ defmodule Golf.GamesDbTest do
       assert Games.can_act?(game, p0)
       assert Games.can_act?(game, p1)
 
+      round = Games.current_round(game)
+      hand = Games.get_hand(round.hands, p0.id)
+      assert 0 == Games.score(hand)
+
       event = Event.new(p0.id, :flip, 0)
       {:ok, game} = GamesDb.handle_event(game, event)
 
@@ -70,8 +74,8 @@ defmodule Golf.GamesDbTest do
 
       assert game == GamesDb.get_game(game.id)
 
-      round = Games.current_round(game) |> Map.drop([:events])
-      dbg(round)
+      # round = Games.current_round(game) |> Map.drop([:events])
+      # dbg(round)
     end
   end
 end

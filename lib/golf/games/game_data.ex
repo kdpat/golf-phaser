@@ -1,16 +1,37 @@
 defmodule Golf.Games.GameData do
+  @moduledoc """
+  The game data that will be sent to the client.
+  """
+
   alias Golf.Games
 
   @derive Jason.Encoder
-  defstruct [:id, :userId, :hostId, :turn, :state, :deck, :tableCards, :players, :playerId, :playableCards]
+  defstruct [
+    :id,
+    :userId,
+    :hostId,
+    :turn,
+    :state,
+    :deck,
+    :tableCards,
+    :players,
+    :playerId,
+    :playableCards
+  ]
 
   def new(game, user) do
     player_index = Enum.find_index(game.players, fn p -> p.user.id == user.id end)
     player = if player_index, do: Enum.at(game.players, player_index)
-    # num_players = length(game.players)
-    # positions = player_positions(num_players)
+
     round = Games.current_round(game)
-    # held_card = round && round.held_card
+    positions = player_positions(length(game.players))
+
+    players =
+      game.players
+      |> put_hands_scores(round && round.hands)
+      |> maybe_rotate(player_index)
+      |> Enum.map(&put_player_data(&1, round))
+      |> Enum.zip_with(positions, &Map.put(&1, :position, &2))
 
     playable_cards =
       if round && player do
@@ -18,10 +39,6 @@ defmodule Golf.Games.GameData do
       else
         []
       end
-
-    players =
-      game.players
-      |> maybe_rotate(player_index)
 
     %__MODULE__{
       id: game.id,
@@ -37,6 +54,14 @@ defmodule Golf.Games.GameData do
     }
   end
 
+  defp rotate(list, n) do
+    {left, right} = Enum.split(list, n)
+    right ++ left
+  end
+
+  defp maybe_rotate(list, n) when n in [0, nil], do: list
+  defp maybe_rotate(list, n), do: rotate(list, n)
+
   defp player_positions(num_players) do
     case num_players do
       1 -> ~w(bottom)
@@ -46,11 +71,37 @@ defmodule Golf.Games.GameData do
     end
   end
 
-  def rotate(list, n) do
-    {left, right} = Enum.split(list, n)
-    right ++ left
+  defp put_player_data(player, nil) do
+    player
+    |> Map.put(:can_act?, false)
   end
 
-  def maybe_rotate(list, n) when n in [0, nil], do: list
-  def maybe_rotate(list, n), do: rotate(list, n)
+  defp put_player_data(player, round) do
+    player
+    |> maybe_put_held_card(round && round.held_card)
+    |> Map.put(:can_act?, Games.can_act_round?(round, player))
+  end
+
+  defp maybe_put_held_card(player, %{"player_id" => card_owner} = card)
+       when player.id == card_owner do
+    %{player | heldCard: card["name"]}
+  end
+
+  defp maybe_put_held_card(player, _), do: player
+
+  defp put_hands_scores(players, hands) do
+    Enum.map(players, &put_hand_score(&1, Games.get_hand(hands, &1.id)))
+  end
+
+  defp put_hand_score(player, hand) when is_list(hand) do
+    player
+    |> Map.put(:hand, hand)
+    |> Map.put(:score, Games.score(hand))
+  end
+
+  defp put_hand_score(player, _) do
+    player
+    |> Map.put(:hand, [])
+    |> Map.put(:score, 0)
+  end
 end

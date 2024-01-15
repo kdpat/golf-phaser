@@ -106,21 +106,21 @@ defmodule Golf.Games do
     can_act_round?(round, player)
   end
 
-  defp can_act_round?(%Round{state: :round_over}, _player), do: false
+  def can_act_round?(%Round{state: :round_over}, _player), do: false
 
-  defp can_act_round?(%Round{state: :flip_2} = round, player) do
+  def can_act_round?(%Round{state: :flip_2} = round, player) do
     hand = get_hand(round.hands, player.id)
     num_cards_face_up(hand) < 2
   end
 
-  defp can_act_round?(%Round{} = round, player) do
+  def can_act_round?(%Round{} = round, player) do
     num_players = length(Map.values(round.hands))
 
     rem(round.turn - 1, num_players) ==
       Integer.mod(player.turn - round.first_player_index, num_players)
   end
 
-  defp get_hand(hands, player_id) do
+  def get_hand(hands, player_id) do
     id_str = Integer.to_string(player_id)
     hands[id_str]
   end
@@ -361,5 +361,122 @@ defmodule Golf.Games do
       table_cards: table_cards,
       first_player_out_id: first_player_out_id
     }
+  end
+
+  def score(hand) do
+    hand
+    |> Enum.map(&rank_if_face_up/1)
+    |> score_ranks(0)
+  end
+
+  # "AS" -> ace of spades, "KH" -> king of hearts etc.
+  # The rank is the first char of the name. rank "AS" -> ?A
+  # rank_if_face_up?(%{"face_up" => true, "name" => "AS"}) == ?A
+  defp rank_if_face_up(%{"face_up?" => true, "name" => <<rank, _>>}), do: rank
+  defp rank_if_face_up(_), do: nil
+
+  defp rank_value(rank) when is_integer(rank) do
+    case rank do
+      # joker
+      ?j -> -2
+      ?K -> 0
+      ?A -> 1
+      ?2 -> 2
+      ?3 -> 3
+      ?4 -> 4
+      ?5 -> 5
+      ?6 -> 6
+      ?7 -> 7
+      ?8 -> 8
+      ?9 -> 9
+      r when r in [?T, ?J, ?Q] -> 10
+    end
+  end
+
+  # Each hand consists of two rows of three cards.
+  # Face down cards are represented by nil and ignored.
+  # If the cards are face up and in a matching column, they are worth 0 points and discarded.
+
+  # Special cases:
+  #   6 of a kind -> -40 pts
+  #   4 of a kind (outer cols) -> -20 pts
+  #   4 of a kind (adjacent cols) -> -10 pts
+
+  # The rank value of each remaining face up card is totaled together.
+  defp score_ranks(ranks, total) do
+    case ranks do
+      # all match, -40 points
+      [a, a, a, a, a, a] when is_integer(a) ->
+        -40
+
+      [?j, b, ?j, ?j, c, ?j] ->
+        score_ranks([b, c], -28)
+
+      # outer cols match, -20 points
+      [a, b, a, a, c, a] when is_integer(a) ->
+        score_ranks([b, c], total - 20)
+
+      [?j, ?j, a, ?j, ?j, b] ->
+        score_ranks([a, b], total - 18)
+
+      # left 2 cols match, -10 points
+      [a, a, b, a, a, c] when is_integer(a) ->
+        score_ranks([b, c], total - 10)
+
+      [a, ?j, ?j, b, ?j, ?j] ->
+        score_ranks([a, b], total - 18)
+
+      # right 2 cols match, -10 points
+      [a, b, b, c, b, b] when is_integer(b) ->
+        score_ranks([a, c], total - 10)
+
+      [?j, b, c, ?j, d, e] ->
+        score_ranks([b, c, d, e], total - 4)
+
+      # left col match
+      [a, b, c, a, d, e] when is_integer(a) ->
+        score_ranks([b, c, d, e], total)
+
+      [a, ?j, c, d, ?j, e] ->
+        score_ranks([a, c, d, e], total - 4)
+
+      # middle col match
+      [a, b, c, d, b, e] when is_integer(b) ->
+        score_ranks([a, c, d, e], total)
+
+      [a, b, ?j, d, e, ?j] ->
+        score_ranks([a, b, d, e], total - 4)
+
+      # right col match
+      [a, b, c, d, e, c] when is_integer(c) ->
+        score_ranks([a, b, d, e], total)
+
+      [?j, b, ?j, c] ->
+        score_ranks([b, c], total - 4)
+
+      # left col match, pass 2
+      [a, b, a, c] when is_integer(a) ->
+        score_ranks([b, c], total)
+
+      [a, ?j, c, ?j] ->
+        score_ranks([a, c], total - 4)
+
+      # right col match, pass 2
+      [a, b, c, b] when is_integer(b) ->
+        score_ranks([a, c], total)
+
+      [?j, ?j] ->
+        total - 4
+
+      # match, pass 3
+      [a, a] when is_integer(a) ->
+        total
+
+      # no matches, add the rank val of each face up card to the total
+      _ ->
+        ranks
+        |> Enum.reject(&is_nil/1)
+        |> Enum.reduce(total, fn rank, acc -> rank_value(rank) + acc end)
+    end
   end
 end

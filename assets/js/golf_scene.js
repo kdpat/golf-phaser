@@ -51,6 +51,13 @@ class GolfScene extends Phaser.Scene {
 
     this.cards = {
       deck: null,
+      table: [],
+      hand: {
+        bottom: [],
+        left: [],
+        top: [],
+        right: [],
+      },
     };
   }
 
@@ -65,23 +72,48 @@ class GolfScene extends Phaser.Scene {
   }
 
   create() {
-    // this.addDeck();
-    // this.createStartGameButton();
-
-    // setup events
     EMITTER.on("game_loaded", this.onGameLoad, this);
     EMITTER.on("round_started", this.onRoundStart, this);
-
     EMITTER.emit("golf_scene_ready");
   }
 
-  addCard(cardName, x, y) {
-    return this.add.image(x, y, cardName).setScale(CARD_SCALE);
+  addCard(cardName, x, y, angle = 0) {
+    return this.add.image(x, y, cardName)
+      .setScale(CARD_SCALE)
+      .setAngle(angle);
   }
 
-  addDeck() {
-    const {x, y} = deckCoord(WIDTH, HEIGHT, this.golfGame.state);
+  addDeck(state) {
+    const { x, y } = deckCoord(WIDTH, HEIGHT, state);
     this.cards.deck = this.addCard(DOWN_CARD, x, y);
+  }
+
+  addTableCards() {
+    const card0 = this.golfGame.tableCards[0];
+    const card1 = this.golfGame.tableCards[1];
+
+    // add the second card first, so it's on bottom
+    if (card1) {
+      this.cards.table[1] = this.addTableCard(card1);
+    }
+
+    if (card0) {
+      this.cards.table[0] = this.addTableCard(card0);
+    }
+  }
+
+  addTableCard(card) {
+    const { x, y } = tableCoord(WIDTH, HEIGHT);
+    return this.addCard(card, x, y);
+  }
+
+  addHand(player) {
+    player.hand.forEach((card, i) => {
+      const cardName = card["face_up?"] ? card.name : DOWN_CARD;
+      const { x, y, rotation } = handCardCoord(WIDTH, HEIGHT, player.position, i);
+      const image = this.addCard(cardName, x, y, rotation);
+      this.cards.hand[player.position][i] = image;
+    });
   }
 
   sendStartRound() {
@@ -93,25 +125,39 @@ class GolfScene extends Phaser.Scene {
     console.log("on game load", game);
     this.golfGame = game;
 
-    this.addDeck();
+    this.addDeck(game.state);
 
-    if (game.userId === game.hostId && game.state === "no_round") {
+    if (game.state !== "no_round") {
+      this.addTableCards();
+
+      for (const player of game.players) {
+        this.addHand(player);
+      }
+    }
+
+    const canStartRound = game.userId === game.hostId && game.state === "no_round";
+
+    if (canStartRound) {
       this.createStartGameButton();
     }
   }
 
   onRoundStart(game) {
     console.log("on round start", game);
+    this.golfGame = game;
+
     if (this.startButtonBg) {
       this.destroyStartGameButton();
     }
 
-    this.tweens.add({
+    const tween = this.tweens.add({
       targets: this.cards.deck,
       x: WIDTH / 2 - CARD_WIDTH / 2 - DECK_TABLE_OFFSET,
       duration: 500,
       ease: "Quad.easeOut",
     });
+
+    tween.on("complete", () => this.addTableCards());
   }
 
   createStartGameButton() {
@@ -156,6 +202,7 @@ const config = {
   scene: GolfScene,
   scale: {
     mode: Phaser.Scale.FIT,
+    // mode: Phaser.Scale.RESIZE_ALL,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     parent: PARENT_ID,
   },
@@ -169,6 +216,8 @@ export function createPhaserGame(pushEvent) {
 // coords
 
 const DECK_TABLE_OFFSET = 4; // px between deck and table cards
+const HAND_X_PAD = 3;
+const HAND_Y_PAD = 10;
 
 export function deckCoord(width, height, state) {
   const x = state === "no_round"
@@ -218,35 +267,6 @@ export function heldCardCoord(width, height, pos, xPad = HAND_X_PAD, yPad = HAND
 
   return { x, y, rotation: 0 };
 }
-
-// function handCardCoord(width, height, pos, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
-//   let x = 0, y = 0;
-//   const xOffset = index % 3 === 0 ? -CARD_WIDTH - xPad : (index % 3 === 2 ? CARD_WIDTH + xPad : 0);
-//   const yOffset = index < 3 ? -CARD_HEIGHT * 1.5 - yPad * 1.3 - 30 : -CARD_HEIGHT / 2 - yPad - 30;
-
-//   switch (pos) {
-//     case "bottom":
-//       x = width / 2 + xOffset;
-//       y = height - CARD_HEIGHT / 2 + yOffset;
-//       break;
-//     case "top":
-//       x = width / 2 + xOffset;
-//       y = CARD_HEIGHT / 2 + yOffset;
-//       break;
-//     case "left":
-//       x = CARD_WIDTH / 2 + yOffset;
-//       y = height / 2 + xOffset;
-//       break;
-//     case "right":
-//       x = width - CARD_WIDTH / 2 + yOffset;
-//       y = height / 2 + xOffset;
-//       break;
-//     default:
-//       throw new Error(`invalid position: ${pos}`);
-//   }
-
-//   return { x, y, rotation: 0 };
-// }
 
 export function handCardCoord(width, height, pos, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   switch (pos) {
