@@ -2,7 +2,7 @@ defmodule Golf.Games.Player do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @derive {Jason.Encoder, only: [:turn, :user]}
+  @derive {Jason.Encoder, only: [:id, :turn, :user]}
   schema "players" do
     field :turn, :integer
 

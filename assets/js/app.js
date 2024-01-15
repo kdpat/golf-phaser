@@ -14,13 +14,14 @@ hooks.GameCanvas = {
 
     this.handleEvent("game_loaded", data => {
       console.log("event game loaded", data);
-      EMITTER.once("scene_ready", () => {
+      EMITTER.once("golf_scene_ready", () => {
         EMITTER.emit("game_loaded", data.game);
       });
     });
 
     this.handleEvent("round_started", data => {
       console.log("round started", data);
+      EMITTER.emit("round_started", data.game);
     });
   }
 }

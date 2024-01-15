@@ -2,7 +2,7 @@ defmodule Golf.Games.GameData do
   alias Golf.Games
 
   @derive Jason.Encoder
-  defstruct [:id, :hostId, :turn, :state, :deck, :tableCards, :players, :playerId, :playableCards]
+  defstruct [:id, :userId, :hostId, :turn, :state, :deck, :tableCards, :players, :playerId, :playableCards]
 
   def new(game, user) do
     player_index = Enum.find_index(game.players, fn p -> p.user.id == user.id end)
@@ -25,6 +25,7 @@ defmodule Golf.Games.GameData do
 
     %__MODULE__{
       id: game.id,
+      userId: user.id,
       hostId: game.host_id,
       turn: round && round.turn,
       state: Games.current_state(game),
