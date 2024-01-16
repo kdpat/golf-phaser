@@ -4,21 +4,23 @@ export const EMITTER = new Phaser.Events.EventEmitter();
 
 export const BG_COLOR = 0x228b22;
 
-export const GAME_WIDTH = 600;
-export const GAME_HEIGHT = 600;
+export const GAME_WIDTH = 1200;
+export const GAME_HEIGHT = 1200;
 
-export const CARD_SCALE = 0.29;
+export const CARD_SCALE = 0.5;
 
-export const CARD_IMG_WIDTH = 242;
-export const CARD_IMG_HEIGHT = 338;
+export const CARD_IMG_WIDTH = 225;
+export const CARD_IMG_HEIGHT = 315;
 
 export const CARD_WIDTH = CARD_IMG_WIDTH * CARD_SCALE;
 export const CARD_HEIGHT = CARD_IMG_HEIGHT * CARD_SCALE;
 
-export const HAND_X_PAD = 3;
-export const HAND_Y_PAD = 10;
+// px between hand cards
+export const HAND_X_PAD = GAME_WIDTH / 60;
+export const HAND_Y_PAD = GAME_HEIGHT / 16;
 
-export const DECK_TABLE_OFFSET = 4; // px between deck and table cards
+// px between deck and table cards
+export const DECK_TABLE_OFFSET = GAME_WIDTH / 120;
 
 export const RANKS = "KA23456789TJQ".split("");
 export const SUITS = "CDHS".split("");
@@ -41,5 +43,5 @@ export function cardNames() {
 }
 
 export function cardPath(name) {
-  return `/images/cards/${name}.svg`;
+  return `/images/cards/svg/${name}.svg`;
 }

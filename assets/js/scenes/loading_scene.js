@@ -1,5 +1,5 @@
 import * as Phaser from "../../vendor/phaser.min.js";
-import { cardPath, CARD_NAMES } from "../game.js";
+import { cardPath, CARD_NAMES, CARD_SCALE } from "../game.js";
 import { GAME_HEIGHT } from "../game.js";
 import { GAME_WIDTH } from "../game.js";
 import { BG_COLOR } from "../game.js";
@@ -17,11 +17,11 @@ export class LoadingScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(BG_COLOR);
 
     for (const card of CARD_NAMES) {
-      this.load.image(card, cardPath(card));
+      this.load.svg(card, cardPath(card), { scale: CARD_SCALE * 100 });
     }
 
     this.loadingText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'Loading...', {
-      font: '32px monospace',
+      font: '64px monospace',
       fill: '#ffffff'
     }).setOrigin(0.5, 0.5);
   }

@@ -55,8 +55,8 @@ defmodule Golf.GamesDb do
   end
 
   def add_player(%Game{} = game, %User{} = user) do
-    turn = length(game.players)
-    attrs = %{game_id: game.id, user_id: user.id, turn: turn}
+    player_turn = length(game.players)
+    attrs = %{game_id: game.id, user_id: user.id, turn: player_turn}
 
     player =
       %Player{}

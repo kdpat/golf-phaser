@@ -16,10 +16,15 @@ const config = {
   scene: [LoadingScene, GolfScene],
   scale: {
     parent: PARENT_ID,
-    // mode: Phaser.Scale.FIT,
-    mode: Phaser.Scale.RESIZE_ALL,
+    mode: Phaser.Scale.FIT,
+    // mode: Phaser.Scale.RESIZE_ALL,
     // autoCenter: Phaser.Scale.CENTER_BOTH,
   },
+  render: {
+    roundPixels: true,
+  //   // mipmaps: true,
+  },
+  resolution: 2,
 };
 
 export function createPhaserGame(pushEvent) {

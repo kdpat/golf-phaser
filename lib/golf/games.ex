@@ -53,7 +53,7 @@ defmodule Golf.Games do
     num_cards_face_up(hand) == @hand_size - 1
   end
 
-  defp min_two_face_up?(hand) do
+  defp two_face_up?(hand) do
     num_cards_face_up(hand) >= 2
   end
 
@@ -168,7 +168,7 @@ defmodule Golf.Games do
     |> Enum.map(fn name -> %{"name" => name, "face_up?" => false} end)
     |> Enum.chunk_every(@hand_size)
     |> Enum.zip(player_str_ids(players))
-    |> Enum.reduce(%{}, fn {hand, player_id}, acc -> Map.put(acc, player_id, hand) end)
+    |> Enum.reduce(%{}, fn {hand, player_id}, hands -> Map.put(hands, player_id, hand) end)
   end
 
   defp player_str_ids(players) do
@@ -224,7 +224,7 @@ defmodule Golf.Games do
 
     all_flipped_two? =
       Map.values(hands)
-      |> Enum.all?(&min_two_face_up?/1)
+      |> Enum.all?(&two_face_up?/1)
 
     {state, turn} =
       if all_flipped_two? do

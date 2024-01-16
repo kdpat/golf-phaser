@@ -1,5 +1,5 @@
 import * as Phaser from "../../vendor/phaser.min.js";
-import { DOWN_CARD, CARD_SCALE, CARD_WIDTH, DECK_TABLE_OFFSET, BG_COLOR, GAME_WIDTH, GAME_HEIGHT, EMITTER } from "../game.js";
+import { DOWN_CARD, CARD_WIDTH, DECK_TABLE_OFFSET, BG_COLOR, GAME_WIDTH, GAME_HEIGHT, EMITTER, CARD_SCALE } from "../game.js";
 import { deckCoord, tableCoord, handCardCoord, heldCardCoord } from "../coords.js";
 import { makeHandTweens } from "../tweens.js";
 
@@ -37,10 +37,7 @@ export class GolfScene extends Phaser.Scene {
   // card sprites
 
   addCard(cardName, x, y, angle = 0) {
-    const img = this.add.image(x, y, cardName)
-      .setScale(CARD_SCALE)
-      .setAngle(angle);
-
+    const img = this.add.image(x, y, cardName).setAngle(angle);
     img.cardName = cardName;
     return img;
   }
@@ -87,16 +84,20 @@ export class GolfScene extends Phaser.Scene {
   }
 
   addHand(player) {
+    const hand = this.cards.hands[player.position];
+
     player.hand.forEach((card, index) => {
       const cardName = card["face_up?"] ? card.name : DOWN_CARD;
       const { x, y, rotation } = handCardCoord(GAME_WIDTH, GAME_HEIGHT, player.position, index);
       const cardImg = this.addCard(cardName, x, y, rotation);
-      this.cards.hands[player.position][index] = cardImg;
+      hand[index] = cardImg;
 
       if (isPlayable(this.golfGame, `hand_${index}`)) {
         makePlayable(cardImg, () => this.pushHandClick(index));
       }
     });
+
+    return hand;
   }
 
   addHeldCard(player) {
@@ -110,10 +111,10 @@ export class GolfScene extends Phaser.Scene {
     const tableImg = this.cards.table[0];
 
     if (tableImg && isPlayable(this.golfGame, "held")) {
+      // TODO find better names
       // originally the user clicked on the held card to send a discard event
       // it feels more natural to click the table instead, so we'll set up the handler on the table image
       // the tableImg will call onTableClick when "table" is in playableCards, and onHeldClick when "held" is in playableCards
-      // TODO find better names
       makePlayable(tableImg, () => this.pushHeldClick());
     }
   }
@@ -151,8 +152,7 @@ export class GolfScene extends Phaser.Scene {
     let handsTweens = [];
 
     game.players.forEach((player, i) => {
-      this.addHand(player);
-      const hand = this.cards.hands[player.position];
+      const hand = this.addHand(player);
       const tweens = makeHandTweens(this, GAME_WIDTH, GAME_HEIGHT, hand, i);
       handsTweens.push(tweens);
     });
@@ -220,13 +220,13 @@ export class GolfScene extends Phaser.Scene {
   }
 
   onFlip(game, player, event) {
-    const handImages = this.cards.hands[player.position];
-    const cardImg = handImages[event.hand_index];
+    const hand = this.cards.hands[player.position];
+    const cardImg = hand[event.hand_index];
 
     const cardName = player.hand[event.hand_index].name;
     cardImg.setTexture(cardName);;
 
-    handImages.forEach((img, i) => {
+    hand.forEach((img, i) => {
       if (!isPlayable(game, `hand_${i}`)) {
         makeUnplayable(img);
       }
@@ -293,7 +293,7 @@ export class GolfScene extends Phaser.Scene {
       // if the game is over, flip all the player's cards
       if (game.isFlipped) {
         const cardName = player.hand[i].name;
-        cardImg.setTexture(cardName);;
+        cardImg.setTexture(cardName);
       }
     });
 
@@ -386,12 +386,12 @@ export class GolfScene extends Phaser.Scene {
   // ui
 
   createStartGameButton() {
-    const width = 150;
-    const height = 50;
-    const radius = 10;
+    const width = 300;
+    const height = 100;
+    const radius = 20;
     const bgColor = 0x0000ff;
     const textColor = '#ffffff';
-    const margin = 20; // px from the bottom of the canvas
+    const margin = 40; // px from the bottom of the canvas
     const x = GAME_WIDTH / 2 - width / 2;
     const y = GAME_HEIGHT - height - margin;
 
@@ -406,7 +406,7 @@ export class GolfScene extends Phaser.Scene {
     );
 
     this.startButton.text = this.add.text(GAME_WIDTH / 2, y + height / 2, 'Start Game', {
-      font: '24px monospace',
+      font: '48px monospace',
       fill: textColor
     }).setOrigin(0.5);
 

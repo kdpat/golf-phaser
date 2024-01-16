@@ -10,8 +10,7 @@ const hooks = {};
 
 hooks.GameCanvas = {
   mounted() {
-    const pushEvent = this.pushEvent.bind(this);
-    createPhaserGame(pushEvent);
+    createPhaserGame(this.pushEvent.bind(this));
 
     this.handleEvent("game_loaded", data => {
       console.log("game loaded", data);
