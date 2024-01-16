@@ -181,6 +181,9 @@ export class GolfScene extends Phaser.Scene {
       case "discard":
         this.onDiscard(game, player);
         break;
+      case "swap":
+        this.onSwap(game, player, event);
+        break;
     }
 
     this.golfGame = game;
@@ -190,8 +193,8 @@ export class GolfScene extends Phaser.Scene {
     const handImages = this.cards.hands[player.position];
     const cardImg = handImages[event.hand_index];
 
-    const cardName = player.hand[event.hand_index]["name"];
-    cardImg.setTexture(cardName);
+    const cardName = player.hand[event.hand_index].name;
+    cardImg.setTexture(cardName);;
 
     handImages.forEach((img, i) => {
       if (!isPlayable(game, `hand_${i}`)) {
@@ -255,15 +258,15 @@ export class GolfScene extends Phaser.Scene {
 
     const hand = this.cards.hands[player.position];
 
-    hand.forEach((img, i) => {
+    hand.forEach((cardImg, i) => {
       if (!isPlayable(game, `hand_${i}`)) {
-        makeUnplayable(img);
+        makeUnplayable(cardImg);
       }
 
       // if the game is over, flip all the player's cards
       if (game.isFlipped) {
         const cardName = player.hand[i].name;
-        img.setTexture(cardName);
+        cardImg.setTexture(cardName);;
       }
     });
 
@@ -277,6 +280,44 @@ export class GolfScene extends Phaser.Scene {
 
     if (this.cards.table[1]) {
       makeUnplayable(this.cards.table[1]);
+    }
+  }
+
+  onSwap(game, player, event) {
+    if (this.cards.table[0]) {
+      makeUnplayable(this.cards.table[0]);
+    }
+
+    this.addTableCard(game.tableCards[0]);
+
+    const hand = this.cards.hands[player.position];
+    const cardImg = hand[event.hand_index]
+    const cardName = player.hand[event.hand_index].name;
+    cardImg.setTexture(cardName);
+
+    this.cards.held.destroy();
+    this.cards.held = null;
+
+    // if this is the last round, flip all the player's cards
+    if (game.isFlipped) {
+      hand.forEach((cardImg, i) => {
+        const cardName = player.hand[i].name;
+        cardImg.setTexture(cardName);
+      });
+    }
+
+    if (player.id === game.playerId) {
+      for (const cardImg of hand) {
+        makeUnplayable(cardImg);
+      }
+    }
+
+    if (isPlayable(game, "deck")) {
+      makePlayable(this.cards.deck, () => this.pushDeckClick());
+    }
+
+    if (isPlayable(game, "table")) {
+      makePlayable(this.cards.table[0], () => this.pushTableClick());
     }
   }
 
