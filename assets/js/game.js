@@ -2,7 +2,7 @@ import * as Phaser from "../vendor/phaser.min.js";
 
 export const EMITTER = new Phaser.Events.EventEmitter();
 
-export const CARD_SCALE = 0.25;
+export const CARD_SCALE = 0.29;
 
 export const CARD_IMG_WIDTH = 242;
 export const CARD_IMG_HEIGHT = 338;

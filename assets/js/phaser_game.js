@@ -16,8 +16,8 @@ const config = {
   scene: [LoadingScene, GolfScene],
   scale: {
     parent: PARENT_ID,
-    mode: Phaser.Scale.FIT,
-    // mode: Phaser.Scale.RESIZE_ALL,
+    // mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE_ALL,
     // autoCenter: Phaser.Scale.CENTER_BOTH,
   },
 };

@@ -1,6 +1,7 @@
 import * as Phaser from "../../vendor/phaser.min.js";
 import { DOWN_CARD, CARD_SCALE, CARD_WIDTH, DECK_TABLE_OFFSET, BG_COLOR, GAME_WIDTH, GAME_HEIGHT, EMITTER } from "../game.js";
 import { deckCoord, tableCoord, handCardCoord, heldCardCoord } from "../coords.js";
+import { makeHandTweens } from "../tweens.js";
 
 export class GolfScene extends Phaser.Scene {
   constructor() {
@@ -89,11 +90,11 @@ export class GolfScene extends Phaser.Scene {
     player.hand.forEach((card, index) => {
       const cardName = card["face_up?"] ? card.name : DOWN_CARD;
       const { x, y, rotation } = handCardCoord(GAME_WIDTH, GAME_HEIGHT, player.position, index);
-      const img = this.addCard(cardName, x, y, rotation);
-      this.cards.hands[player.position][index] = img;
+      const cardImg = this.addCard(cardName, x, y, rotation);
+      this.cards.hands[player.position][index] = cardImg;
 
       if (isPlayable(this.golfGame, `hand_${index}`)) {
-        makePlayable(img, () => this.pushHandClick(index));
+        makePlayable(cardImg, () => this.pushHandClick(index));
       }
     });
   }
@@ -104,8 +105,8 @@ export class GolfScene extends Phaser.Scene {
       : DOWN_CARD;
 
     const { x, y, rotation } = heldCardCoord(GAME_WIDTH, GAME_HEIGHT, player.position);
-    const img = this.addCard(cardName, x, y, rotation);
-    this.cards.held = img;
+    const cardImg = this.addCard(cardName, x, y, rotation);
+    this.cards.held = cardImg;
 
     const tableImg = this.cards.table[0];
 
@@ -148,19 +149,49 @@ export class GolfScene extends Phaser.Scene {
       this.destroyStartGameButton();
     }
 
-    const tween = this.tweens.add({
-      targets: this.cards.deck,
-      x: GAME_WIDTH / 2 - CARD_WIDTH / 2 - DECK_TABLE_OFFSET,
-      duration: 500,
-      ease: "Quad.easeOut",
+    let handsTweens = [];
+
+    game.players.forEach((player, i) => {
+      this.addHand(player);
+      const hand = this.cards.hands[player.position];
+      const tweens = makeHandTweens(this, GAME_WIDTH, GAME_HEIGHT, hand, i);
+      handsTweens.push(tweens);
     });
 
-    tween.on("complete", () => {
-      this.addTableCards()
+    handsTweens.forEach((handTweens, playerIndex) => {
+      handTweens.forEach((tween, cardIndex) => {
+        // start tweening the deck after dealing to the last player
+        if (playerIndex === game.players.length - 1 && cardIndex === 5) {
+          tween.setCallback("onComplete", () => {
 
-      for (const player of game.players) {
-        this.addHand(player);
-      }
+            const tween = this.tweens.add({
+              targets: this.cards.deck,
+              x: GAME_WIDTH / 2 - CARD_WIDTH / 2 - DECK_TABLE_OFFSET,
+              duration: 200,
+              ease: "Quad.easeOut",
+              onComplete: () => {
+                this.addTableCards();
+
+                const tableImg = this.cards.table[0];
+                const x = tableImg.x;
+                const y = tableImg.y;
+                tableImg.x = this.cards.deck.x;
+                tableImg.y = this.cards.deck.y;
+
+                this.tweens.add({
+                  targets: tableImg,
+                  x,
+                  y,
+                  duration: 400,
+                  ease: "Quad.easeOut",
+                });
+              },
+            });
+          });
+        }
+
+        tween.resume();
+      });
     });
   }
 
@@ -238,10 +269,7 @@ export class GolfScene extends Phaser.Scene {
       makeUnplayable(this.cards.deck);
 
       if (this.cards.table[0]) {
-        // set a timeout in case the user accidentally double clicks
-        setTimeout(() => {
-          makePlayable(this.cards.table[0], () => this.pushTableClick());
-        }, 250);
+        makePlayable(this.cards.table[0], () => this.pushTableClick());
       }
 
       const hand = this.cards.hands[player.position];
