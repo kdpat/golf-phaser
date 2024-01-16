@@ -33,18 +33,23 @@ export class GolfScene extends Phaser.Scene {
     this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
       const zoomFactor = 0.1;
 
-      if (deltaY > 0) {
+      if (deltaY > 0 && this.camera.zoom < 2) {
         // scrolled up, zoom in
         this.camera.zoom += zoomFactor;
-      } else if (deltaY < 0 && this.camera.zoom > zoomFactor * 2) {
+      } else if (deltaY < 0 && this.camera.zoom > 0.5) {
         // scrolled down, zoom out
         this.camera.zoom -= zoomFactor;
       }
-
-      console.log("zoom", this.camera.zoom)
     });
 
     // setup mouse dragging
+    this.cameraBounds = {
+      minX: -600,
+      minY: -600,
+      maxX: 600,
+      maxY: 600
+    };
+
     this.isDragging = false;
     this.dragStartX = 0;
     this.dragStartY = 0;
@@ -55,29 +60,42 @@ export class GolfScene extends Phaser.Scene {
       this.dragStartY = pointer.y;
     });
 
-    // Listen for when the pointer is moved
+    this.input.on('pointerupoutside', () => {
+      this.isDragging = false;
+    });
+
+    // listen for when the pointer is moved
     this.input.on('pointermove', pointer => {
       if (this.isDragging) {
         const dragX = pointer.x - this.dragStartX;
         const dragY = pointer.y - this.dragStartY;
 
-        this.camera.scrollX -= dragX;
-        this.camera.scrollY -= dragY;
+        // clamp camera
+        this.camera.scrollX = Phaser.Math.Clamp(
+          this.camera.scrollX - dragX,
+          this.cameraBounds.minX,
+          this.cameraBounds.maxX
+        );
+        this.camera.scrollY = Phaser.Math.Clamp(
+          this.camera.scrollY - dragY,
+          this.cameraBounds.minY,
+          this.cameraBounds.maxY
+        );
 
         this.dragStartX = pointer.x;
         this.dragStartY = pointer.y;
       }
     });
 
-    // Listen for when the pointer is released
+    // listen for when the pointer is released
     this.input.on('pointerup', () => {
       this.isDragging = false;
     });
 
+    // setup key listeners
     this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
-    // setup events
-
+    // setup events listeners
     EMITTER.on("game_loaded", this.onGameLoad, this);
     EMITTER.on("game_event", this.onGameEvent, this);
     EMITTER.on("round_started", this.onRoundStart, this);
@@ -87,11 +105,11 @@ export class GolfScene extends Phaser.Scene {
 
   update() {
     if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
-        // Reset the camera
-        this.camera.setZoom(1);
-        this.camera.centerOn(GAME_WIDTH/2, GAME_HEIGHT/2);
+      // Reset the camera
+      this.camera.setZoom(1);
+      this.camera.centerOn(GAME_WIDTH / 2, GAME_HEIGHT / 2);
     }
-}
+  }
 
   // card sprites
 
@@ -303,6 +321,20 @@ export class GolfScene extends Phaser.Scene {
   onTakeDeck(game, player) {
     this.golfGame = game;
     this.addHeldCard(player);
+
+    const heldImg = this.cards.held;
+    const x = heldImg.x;
+    const y = heldImg.y;
+    heldImg.x = this.cards.deck.x;
+    heldImg.y = this.cards.deck.y;
+
+    this.tweens.add({
+      targets: heldImg,
+      x,
+      y,
+      duration: 750,
+      ease: "Quad.easeInOut",
+    });
 
     if (player.id === this.golfGame.playerId) {
       makeUnplayable(this.cards.deck);
