@@ -16,7 +16,8 @@ defmodule Golf.Games.GameData do
     :players,
     :playerId,
     :userIsHost,
-    :playableCards
+    :playableCards,
+    :isFlipped
   ]
 
   def new(game, user) do
@@ -50,7 +51,8 @@ defmodule Golf.Games.GameData do
       players: players,
       playerId: player && player.id,
       userIsHost: user.id == game.host_id,
-      playableCards: playable_cards
+      playableCards: playable_cards,
+      isFlipped: round && is_integer(round.first_player_out_id)
     }
   end
 
