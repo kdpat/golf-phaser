@@ -28,8 +28,8 @@ export class GolfScene extends Phaser.Scene {
 
   create() {
     EMITTER.on("game_loaded", this.onGameLoad, this);
-    EMITTER.on("round_started", this.onRoundStart, this);
     EMITTER.on("game_event", this.onGameEvent, this);
+    EMITTER.on("round_started", this.onRoundStart, this);
 
     EMITTER.emit("golf_scene_ready");
   }
@@ -100,13 +100,12 @@ export class GolfScene extends Phaser.Scene {
   }
 
   addHeldCard(player) {
-    const cardName = player.id === this.golfGame.playerId
-      ? player.held_card
-      : DOWN_CARD;
+    const isUsersCard = player.id === this.golfGame.playerId;
+    const cardName = isUsersCard ? player.held_card : DOWN_CARD;
 
     const { x, y, rotation } = heldCardCoord(GAME_WIDTH, GAME_HEIGHT, player.position);
-    const cardImg = this.addCard(cardName, x, y, rotation);
-    this.cards.held = cardImg;
+    const heldImg = this.addCard(cardName, x, y, rotation);
+    this.cards.held = heldImg;
 
     const tableImg = this.cards.table[0];
 
@@ -145,7 +144,7 @@ export class GolfScene extends Phaser.Scene {
   onRoundStart(game) {
     this.golfGame = game;
 
-    if (this.startButtonBg) {
+    if (this.startButton) {
       this.destroyStartGameButton();
     }
 
@@ -164,7 +163,7 @@ export class GolfScene extends Phaser.Scene {
         if (playerIndex === game.players.length - 1 && cardIndex === 5) {
           tween.setCallback("onComplete", () => {
 
-            const tween = this.tweens.add({
+            this.tweens.add({
               targets: this.cards.deck,
               x: GAME_WIDTH / 2 - CARD_WIDTH / 2 - DECK_TABLE_OFFSET,
               duration: 200,
@@ -237,7 +236,7 @@ export class GolfScene extends Phaser.Scene {
       makePlayable(this.cards.deck, () => this.pushDeckClick());
     }
 
-    if (isPlayable(game, "table")) {
+    if (isPlayable(game, "table") && this.cards.table[0]) {
       makePlayable(this.cards.table[0], () => this.pushTableClick());
     }
   }
@@ -393,28 +392,32 @@ export class GolfScene extends Phaser.Scene {
     const bgColor = 0x0000ff;
     const textColor = '#ffffff';
     const margin = 20; // px from the bottom of the canvas
+    const x = GAME_WIDTH / 2 - width / 2;
+    const y = GAME_HEIGHT - height - margin;
 
-    const buttonX = GAME_WIDTH / 2 - width / 2;
-    const buttonY = GAME_HEIGHT - height - margin;
+    this.startButton = {};
 
-    this.startButtonBg = this.add.graphics({ x: buttonX, y: buttonY });
-    this.startButtonBg.fillStyle(bgColor, 1);
-    this.startButtonBg.fillRoundedRect(0, 0, width, height, radius);
-    this.startButtonBg.setInteractive(new Phaser.Geom.Rectangle(0, 0, width, height), Phaser.Geom.Rectangle.Contains);
+    this.startButton.background = this.add.graphics({ x, y });
+    this.startButton.background.fillStyle(bgColor, 1);
+    this.startButton.background.fillRoundedRect(0, 0, width, height, radius);
+    this.startButton.background.setInteractive(
+      new Phaser.Geom.Rectangle(0, 0, width, height),
+      Phaser.Geom.Rectangle.Contains
+    );
 
-    this.startButtonText = this.add.text(GAME_WIDTH / 2, buttonY + height / 2, 'Start Game', {
+    this.startButton.text = this.add.text(GAME_WIDTH / 2, y + height / 2, 'Start Game', {
       font: '24px monospace',
       fill: textColor
     }).setOrigin(0.5);
 
-    this.startButtonBg.on('pointerdown', () => this.pushStartRound());
-    this.startButtonBg.on('pointerover', () => this.input.setDefaultCursor('pointer'));
-    this.startButtonBg.on('pointerout', () => this.input.setDefaultCursor('default'));
+    this.startButton.background.on('pointerdown', () => this.pushStartRound());
+    this.startButton.background.on('pointerover', () => this.input.setDefaultCursor('pointer'));
+    this.startButton.background.on('pointerout', () => this.input.setDefaultCursor('default'));
   }
 
   destroyStartGameButton() {
-    this.startButtonBg.destroy();
-    this.startButtonText.destroy();
+    this.startButton.background.destroy();
+    this.startButton.text.destroy();
     this.input.setDefaultCursor('default');
   }
 }

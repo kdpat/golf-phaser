@@ -163,8 +163,8 @@ defmodule Golf.Games do
     }
   end
 
-  defp make_hands(cards, players) do
-    cards
+  defp make_hands(card_names, players) do
+    card_names
     |> Enum.map(fn name -> %{"name" => name, "face_up?" => false} end)
     |> Enum.chunk_every(@hand_size)
     |> Enum.zip(player_str_ids(players))
@@ -230,7 +230,7 @@ defmodule Golf.Games do
       if all_flipped_two? do
         {:take, round.turn + 1}
       else
-        {:flip_2, round.turn}
+        {round.state, round.turn}
       end
 
     %{hands: hands, state: state, turn: turn}
@@ -307,22 +307,21 @@ defmodule Golf.Games do
       when is_nil(round.first_player_out_id) do
     hand = get_hand(round.hands, event.player_id)
 
-    {state, turn, first_player_out_id} =
+    {state, turn} =
       cond do
         # TODO handle player going out early
         one_face_down?(hand) ->
-          {:take, round.turn + 1, round.first_player_out_id}
+          {:take, round.turn + 1}
 
         true ->
-          {:flip, round.turn, round.first_player_out_id}
+          {:flip, round.turn}
       end
 
     %{
       state: state,
       turn: turn,
       held_card: nil,
-      table_cards: [round.held_card["name"] | round.table_cards],
-      first_player_out_id: first_player_out_id
+      table_cards: [round.held_card["name"] | round.table_cards]
     }
   end
 
