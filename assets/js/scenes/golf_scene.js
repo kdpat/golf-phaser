@@ -27,12 +27,71 @@ export class GolfScene extends Phaser.Scene {
   }
 
   create() {
+    this.camera = this.cameras.main;
+
+    // setup mouse wheel zoom
+    this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+      const zoomFactor = 0.1;
+
+      if (deltaY > 0) {
+        // scrolled up, zoom in
+        this.camera.zoom += zoomFactor;
+      } else if (deltaY < 0 && this.camera.zoom > zoomFactor * 2) {
+        // scrolled down, zoom out
+        this.camera.zoom -= zoomFactor;
+      }
+
+      console.log("zoom", this.camera.zoom)
+    });
+
+    // setup mouse dragging
+    this.isDragging = false;
+    this.dragStartX = 0;
+    this.dragStartY = 0;
+
+    this.input.on('pointerdown', pointer => {
+      this.isDragging = true;
+      this.dragStartX = pointer.x;
+      this.dragStartY = pointer.y;
+    });
+
+    // Listen for when the pointer is moved
+    this.input.on('pointermove', pointer => {
+      if (this.isDragging) {
+        const dragX = pointer.x - this.dragStartX;
+        const dragY = pointer.y - this.dragStartY;
+
+        this.camera.scrollX -= dragX;
+        this.camera.scrollY -= dragY;
+
+        this.dragStartX = pointer.x;
+        this.dragStartY = pointer.y;
+      }
+    });
+
+    // Listen for when the pointer is released
+    this.input.on('pointerup', () => {
+      this.isDragging = false;
+    });
+
+    this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+
+    // setup events
+
     EMITTER.on("game_loaded", this.onGameLoad, this);
     EMITTER.on("game_event", this.onGameEvent, this);
     EMITTER.on("round_started", this.onRoundStart, this);
 
     EMITTER.emit("golf_scene_ready");
   }
+
+  update() {
+    if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
+        // Reset the camera
+        this.camera.setZoom(1);
+        this.camera.centerOn(GAME_WIDTH/2, GAME_HEIGHT/2);
+    }
+}
 
   // card sprites
 

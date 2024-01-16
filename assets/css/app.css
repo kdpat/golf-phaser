@@ -8,8 +8,8 @@ body {
   height: 100%;
   text-align: center;
   /* background-color: #228b22; */
-  min-width: 600px;
-  min-height: 600px;
+  /* min-width: 400px; */
+  /* min-height: 400px; */
 }
 
 header {
@@ -21,8 +21,8 @@ header {
   width: 100vw;
   height: calc(98vh - 1.5rem);
   /* overflow: hidden; */
-  min-width: 600px;
-  min-height: 600px;
+  /* min-width: 600px; */
+  /* min-height: 600px; */
   /* margin: auto; */
 }
 
