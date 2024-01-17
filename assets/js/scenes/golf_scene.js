@@ -509,15 +509,31 @@ export class GolfScene extends Phaser.Scene {
     }
 
     const hand = this.cards.hands[player.position];
-    const cardImg = hand[event.hand_index]
+    const handCardImg = hand[event.hand_index]
     const cardName = player.hand[event.hand_index].name;
-    cardImg.setTexture(cardName);
+    handCardImg.setTexture(cardName);
+    const hcX = handCardImg.x;
+    const hcY = handCardImg.y;
 
     const tableImg = this.addTableCard(game.tableCards[0]);
     const x = tableImg.x;
     const y = tableImg.y;
-    tableImg.x = cardImg.x;
-    tableImg.y = cardImg.y;
+    tableImg.x = handCardImg.x;
+    tableImg.y = handCardImg.y;
+
+    handCardImg.x = this.cards.held.x;
+    handCardImg.y = this.cards.held.y;
+
+    this.children.bringToTop(handCardImg);
+    this.children.bringToTop(tableImg);
+
+    this.tweens.add({
+      targets: handCardImg,
+      x: hcX,
+      y: hcY,
+      duration: 750,
+      ease: "Quad.easeInOut",
+    });
 
     this.tweens.add({
       targets: tableImg,
