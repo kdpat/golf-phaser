@@ -23,7 +23,7 @@ const config = {
   render: {
     roundPixels: true,
   },
-  resolution: 2,
+  resolution: 4,
 };
 
 export function createPhaserGame(pushEvent) {

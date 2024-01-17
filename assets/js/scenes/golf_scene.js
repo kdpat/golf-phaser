@@ -3,6 +3,9 @@ import { DOWN_CARD, CARD_HEIGHT, CARD_WIDTH, DECK_TABLE_OFFSET, BG_COLOR, GAME_W
 import { deckCoord, tableCoord, handCardCoord, heldCardCoord } from "../coords.js";
 import { makeHandTweens } from "../tweens.js";
 
+export const PLAYER_TURN_COLOR = "#00ff00";
+export const NOT_PLAYER_TURN_COLOR = "#ff77ff";
+
 export class GolfScene extends Phaser.Scene {
   constructor() {
     super({ key: "GolfScene" });
@@ -16,6 +19,8 @@ export class GolfScene extends Phaser.Scene {
         right: [],
       },
     };
+
+    this.playerTexts = {};
   }
 
   init(data) {
@@ -33,10 +38,13 @@ export class GolfScene extends Phaser.Scene {
 
   update() {
     if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
-      // reset camera
-      this.camera.setZoom(1);
-      this.camera.centerOn(GAME_WIDTH / 2, GAME_HEIGHT / 2);
+      this.resetCamera();
     }
+  }
+
+  resetCamera() {
+    this.camera.setZoom(1);
+    this.camera.centerOn(GAME_WIDTH / 2, GAME_HEIGHT / 2);
   }
 
   setupKeyListeners() {
@@ -54,15 +62,16 @@ export class GolfScene extends Phaser.Scene {
     this.camera.setBackgroundColor(BG_COLOR);
 
     this.cameraBounds = {
-      minX: -600,
-      minY: -600,
-      maxX: 600,
-      maxY: 600
+      minX: -GAME_WIDTH / 2,
+      minY: -GAME_HEIGHT / 2,
+      maxX: GAME_WIDTH / 2,
+      maxY: GAME_HEIGHT / 2,
     };
   }
 
   setupMouseWheelZoom() {
     const zoomFactor = 0.1;
+
     this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
       if (deltaY > 0 && this.camera.zoom < 2) {
         this.camera.zoom += zoomFactor;
@@ -123,7 +132,7 @@ export class GolfScene extends Phaser.Scene {
     const deckImg = this.addCard(DOWN_CARD, x, y);
     this.cards.deck = deckImg;
 
-    if (isPlayable(this.golfGame, "deck")) {
+    if (this.isPlayable("deck")) {
       this.makePlayable(deckImg, () => this.pushCardClick("deck"));
     }
   }
@@ -153,7 +162,7 @@ export class GolfScene extends Phaser.Scene {
     if (card0) {
       const img = this.addTableCard(card0);
 
-      if (isPlayable(this.golfGame, "table")) {
+      if (this.isPlayable("table")) {
         this.makePlayable(img, () => this.pushCardClick("table"));
       }
     }
@@ -168,7 +177,7 @@ export class GolfScene extends Phaser.Scene {
       const cardImg = this.addCard(cardName, x, y, rotation);
       hand[index] = cardImg;
 
-      if (isPlayable(this.golfGame, `hand_${index}`)) {
+      if (this.isPlayable(`hand_${index}`)) {
         this.makePlayable(cardImg, () => this.pushCardClick("hand", index));
       }
     });
@@ -186,7 +195,7 @@ export class GolfScene extends Phaser.Scene {
 
     const tableImg = this.cards.table[0];
 
-    if (tableImg && isPlayable(this.golfGame, "held")) {
+    if (tableImg && this.isPlayable("held")) {
       // TODO find better names
       // originally the user clicked on the held card to send a discard event
       // it feels more natural to click the table instead, so we'll set up the handler on the table image
@@ -196,12 +205,15 @@ export class GolfScene extends Phaser.Scene {
   }
 
   addPlayerText(player) {
+    const color = playerColor(player);
+
     const textStyle = {
       font: '40px monospace',
-      fill: '#ffffff'
+      fill: color,
     };
 
-    const playerInfo = `${player.user.name}: ${player.score}`;
+    const points = player.score == 1 || player.score == -1 ? "pt" : "pts";
+    const playerInfo = `${player.user.name}(${player.score}${points})`;
     const text = this.add.text(0, 0, playerInfo, textStyle);
 
     switch (player.position) {
@@ -230,31 +242,47 @@ export class GolfScene extends Phaser.Scene {
         break;
 
       default:
-        throw new Error(`invalid pos: ${pos}`);
+        throw new Error(`invalid position: ${pos}`);
     }
 
+    this.playerTexts[player.position] = text;
     return text;
+  }
+
+  updatePlayerTexts() {
+    for (const player of this.golfGame.players) {
+      this.updatePlayerText(player);
+    }
+  }
+
+  updatePlayerText(player) {
+    const text = this.playerTexts[player.position];
+    const color = playerColor(player);
+    const points = player.score == 1 || player.score == -1 ? "pt" : "pts";
+    const playerInfo = `${player.user.name}(${player.score}${points})`;
+    text.setText(playerInfo);
+    text.setColor(color);    
   }
 
   // server events
 
   onGameLoad(game) {
-    console.log("hmm")
     this.golfGame = game;
     this.addDeck(game.state);
-
-    game.players.forEach(p => this.addPlayerText(p));
 
     if (game.state !== "no_round") {
       this.addTableCards();
 
       for (const player of game.players) {
+        this.addPlayerText(player);
         this.addHand(player);
 
         if (player.held_card) {
           this.addHeldCard(player);
         }
       }
+    } else {
+      game.players.forEach(p => this.addPlayerText(p));
     }
 
     if (game.userIsHost && game.state === "no_round") {
@@ -275,6 +303,8 @@ export class GolfScene extends Phaser.Scene {
       const hand = this.addHand(player);
       const tweens = makeHandTweens(this, GAME_WIDTH, GAME_HEIGHT, hand, i);
       handsTweens.push(tweens);
+
+      this.updatePlayerText(player);
     });
 
     handsTweens.forEach((handTweens, playerIndex) => {
@@ -318,6 +348,8 @@ export class GolfScene extends Phaser.Scene {
     const player = game.players.find(p => p.id === event.player_id);
     if (!player) throw new Error("null player");
 
+    this.golfGame = game;
+
     switch (event.action) {
       case "flip":
         this.onFlip(game, player, event);
@@ -336,7 +368,7 @@ export class GolfScene extends Phaser.Scene {
         break;
     }
 
-    this.golfGame = game;
+    this.updatePlayerTexts();
   }
 
   onFlip(game, player, event) {
@@ -349,22 +381,21 @@ export class GolfScene extends Phaser.Scene {
     this.wiggleCard(cardImg);
 
     hand.forEach((img, i) => {
-      if (!isPlayable(game, `hand_${i}`)) {
+      if (!this.isPlayable(`hand_${i}`)) {
         this.makeUnplayable(img);
       }
     });
 
-    if (isPlayable(game, "deck")) {
+    if (this.isPlayable("deck")) {
       this.makePlayable(this.cards.deck, () => this.pushCardClick("deck"));
     }
 
-    if (isPlayable(game, "table") && this.cards.table[0]) {
+    if (this.isPlayable("table") && this.cards.table[0]) {
       this.makePlayable(this.cards.table[0], () => this.pushCardClick("table"));
     }
   }
 
   onTakeDeck(game, player) {
-    this.golfGame = game;
     this.addHeldCard(player);
 
     // tween held card from the deck
@@ -395,7 +426,6 @@ export class GolfScene extends Phaser.Scene {
   }
 
   onTakeTable(game, player) {
-    this.golfGame = game;
     this.addHeldCard(player);
 
     // tween held card from table
@@ -429,7 +459,6 @@ export class GolfScene extends Phaser.Scene {
   }
 
   onDiscard(game, player) {
-    this.golfGame = game;
     this.addTableCard(game.tableCards[0]);
 
     const tableImg = this.cards.table[0];
@@ -452,7 +481,7 @@ export class GolfScene extends Phaser.Scene {
     const hand = this.cards.hands[player.position];
 
     hand.forEach((cardImg, i) => {
-      if (!isPlayable(game, `hand_${i}`)) {
+      if (!this.isPlayable(`hand_${i}`)) {
         this.makeUnplayable(cardImg);
       }
 
@@ -463,11 +492,11 @@ export class GolfScene extends Phaser.Scene {
       }
     });
 
-    if (isPlayable(game, "deck")) {
+    if (this.isPlayable("deck")) {
       this.makePlayable(this.cards.deck, () => this.pushCardClick("deck"));
     }
 
-    if (isPlayable(game, "table")) {
+    if (this.isPlayable("table")) {
       this.makePlayable(this.cards.table[0], () => this.pushCardClick("table"));
     }
 
@@ -517,11 +546,11 @@ export class GolfScene extends Phaser.Scene {
       }
     }
 
-    if (isPlayable(game, "deck")) {
+    if (this.isPlayable("deck")) {
       this.makePlayable(this.cards.deck, () => this.pushCardClick("deck"));
     }
 
-    if (isPlayable(game, "table")) {
+    if (this.isPlayable("table")) {
       this.makePlayable(this.cards.table[0], () => this.pushCardClick("table"));
     }
   }
@@ -606,10 +635,14 @@ export class GolfScene extends Phaser.Scene {
       onComplete: () => cardImg.setAngle(0),
     });
   }
+
+  isPlayable(cardPlace) {
+    return this.golfGame.playableCards.includes(cardPlace);
+  }
 }
 
-// util
-
-function isPlayable(game, cardPlace) {
-  return game.playableCards.includes(cardPlace);
+function playerColor(player) {
+  return player["can_act?"]
+    ? PLAYER_TURN_COLOR
+    : NOT_PLAYER_TURN_COLOR;
 }
