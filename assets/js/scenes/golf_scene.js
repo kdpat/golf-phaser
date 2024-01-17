@@ -1,5 +1,5 @@
 import * as Phaser from "../../vendor/phaser.min.js";
-import { DOWN_CARD, CARD_WIDTH, DECK_TABLE_OFFSET, BG_COLOR, GAME_WIDTH, GAME_HEIGHT, EMITTER } from "../game.js";
+import { DOWN_CARD, CARD_HEIGHT, CARD_WIDTH, DECK_TABLE_OFFSET, BG_COLOR, GAME_WIDTH, GAME_HEIGHT, EMITTER, HAND_Y_PAD, HAND_X_PAD } from "../game.js";
 import { deckCoord, tableCoord, handCardCoord, heldCardCoord } from "../coords.js";
 import { makeHandTweens } from "../tweens.js";
 
@@ -22,36 +22,37 @@ export class GolfScene extends Phaser.Scene {
     this.pushEvent = data.pushEvent;
   }
 
-  preload() {
-    this.camera = this.cameras.main;
-    this.camera.setBackgroundColor(BG_COLOR);
-  }
-
   create() {
     this.setupCamera();
     this.setupMouseWheelZoom();
     this.setupMouseDragging();
-
-    // key listeners
-    this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-
-    // setup events listeners
-    EMITTER.on("game_loaded", this.onGameLoad, this);
-    EMITTER.on("game_event", this.onGameEvent, this);
-    EMITTER.on("round_started", this.onRoundStart, this);
-
+    this.setupKeyListeners();
+    this.setupEventListeners();
     EMITTER.emit("golf_scene_ready");
   }
 
   update() {
     if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
-      // Reset the camera
+      // reset camera
       this.camera.setZoom(1);
       this.camera.centerOn(GAME_WIDTH / 2, GAME_HEIGHT / 2);
     }
   }
 
+  setupKeyListeners() {
+    this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+  }
+
+  setupEventListeners() {
+    EMITTER.on("game_loaded", this.onGameLoad, this);
+    EMITTER.on("game_event", this.onGameEvent, this);
+    EMITTER.on("round_started", this.onRoundStart, this);
+  }
+
   setupCamera() {
+    this.camera = this.cameras.main;
+    this.camera.setBackgroundColor(BG_COLOR);
+
     this.cameraBounds = {
       minX: -600,
       minY: -600,
@@ -108,7 +109,7 @@ export class GolfScene extends Phaser.Scene {
 
     this.input.on('pointerup', () => {
       this.isDragging = false;
-    });    
+    });
   }
 
   // card sprites
@@ -123,7 +124,7 @@ export class GolfScene extends Phaser.Scene {
     this.cards.deck = deckImg;
 
     if (isPlayable(this.golfGame, "deck")) {
-      makePlayable(deckImg, () => this.pushDeckClick());
+      this.makePlayable(deckImg, () => this.pushCardClick("deck"));
     }
   }
 
@@ -133,7 +134,7 @@ export class GolfScene extends Phaser.Scene {
 
     // make old card unplayable
     if (this.cards.table[0]) {
-      makeUnplayable(this.cards.table[0]);
+      this.makeUnplayable(this.cards.table[0]);
     }
 
     this.cards.table.unshift(tableImg);
@@ -153,7 +154,7 @@ export class GolfScene extends Phaser.Scene {
       const img = this.addTableCard(card0);
 
       if (isPlayable(this.golfGame, "table")) {
-        makePlayable(img, () => this.pushTableClick());
+        this.makePlayable(img, () => this.pushCardClick("table"));
       }
     }
   }
@@ -168,7 +169,7 @@ export class GolfScene extends Phaser.Scene {
       hand[index] = cardImg;
 
       if (isPlayable(this.golfGame, `hand_${index}`)) {
-        makePlayable(cardImg, () => this.pushHandClick(index));
+        this.makePlayable(cardImg, () => this.pushCardClick("hand", index));
       }
     });
 
@@ -190,15 +191,59 @@ export class GolfScene extends Phaser.Scene {
       // originally the user clicked on the held card to send a discard event
       // it feels more natural to click the table instead, so we'll set up the handler on the table image
       // the tableImg will call onTableClick when "table" is in playableCards, and onHeldClick when "held" is in playableCards
-      makePlayable(tableImg, () => this.pushHeldClick());
+      this.makePlayable(tableImg, () => this.pushCardClick("held"));
     }
+  }
+
+  addPlayerText(player) {
+    const textStyle = {
+      font: '40px monospace',
+      fill: '#ffffff'
+    };
+
+    const playerInfo = `${player.user.name}: ${player.score}`;
+    const text = this.add.text(0, 0, playerInfo, textStyle);
+
+    switch (player.position) {
+      case "bottom":
+        text.x = GAME_WIDTH / 2;
+        text.y = GAME_HEIGHT - 20;
+        text.setOrigin(0.5, 1);
+        break;
+
+      case "top":
+        text.x = GAME_WIDTH / 2;
+        text.y = 20;
+        text.setOrigin(0.5, 0.0);
+        break;
+
+      case "left":
+        text.x = CARD_HEIGHT + 8;
+        text.y = GAME_HEIGHT / 2 - CARD_HEIGHT * 2 - HAND_X_PAD;
+        text.setOrigin(0.5, 0.0);
+        break;
+
+      case "right":
+        text.x = GAME_WIDTH - CARD_HEIGHT - HAND_Y_PAD;
+        text.y = GAME_HEIGHT / 2 - CARD_HEIGHT * 2 - HAND_X_PAD;
+        text.setOrigin(0.5, 0.0);
+        break;
+
+      default:
+        throw new Error(`invalid pos: ${pos}`);
+    }
+
+    return text;
   }
 
   // server events
 
   onGameLoad(game) {
+    console.log("hmm")
     this.golfGame = game;
     this.addDeck(game.state);
+
+    game.players.forEach(p => this.addPlayerText(p));
 
     if (game.state !== "no_round") {
       this.addTableCards();
@@ -213,7 +258,7 @@ export class GolfScene extends Phaser.Scene {
     }
 
     if (game.userIsHost && game.state === "no_round") {
-      this.createStartGameButton();
+      this.createStartButton();
     }
   }
 
@@ -299,20 +344,22 @@ export class GolfScene extends Phaser.Scene {
     const cardImg = hand[event.hand_index];
 
     const cardName = player.hand[event.hand_index].name;
-    cardImg.setTexture(cardName);;
+    cardImg.setTexture(cardName);
+
+    this.wiggleCard(cardImg);
 
     hand.forEach((img, i) => {
       if (!isPlayable(game, `hand_${i}`)) {
-        makeUnplayable(img);
+        this.makeUnplayable(img);
       }
     });
 
     if (isPlayable(game, "deck")) {
-      makePlayable(this.cards.deck, () => this.pushDeckClick());
+      this.makePlayable(this.cards.deck, () => this.pushCardClick("deck"));
     }
 
     if (isPlayable(game, "table") && this.cards.table[0]) {
-      makePlayable(this.cards.table[0], () => this.pushTableClick());
+      this.makePlayable(this.cards.table[0], () => this.pushCardClick("table"));
     }
   }
 
@@ -336,14 +383,14 @@ export class GolfScene extends Phaser.Scene {
     });
 
     if (player.id === this.golfGame.playerId) {
-      makeUnplayable(this.cards.deck);
+      this.makeUnplayable(this.cards.deck);
 
       if (this.cards.table[0]) {
-        makePlayable(this.cards.table[0], () => this.pushTableClick());
+        this.makePlayable(this.cards.table[0], () => this.pushCardClick("table"));
       }
 
       const hand = this.cards.hands[player.position];
-      hand.forEach((img, i) => makePlayable(img, () => this.pushHandClick(i)));
+      hand.forEach((img, i) => this.makePlayable(img, () => this.pushCardClick("hand", i)));
     }
   }
 
@@ -370,14 +417,14 @@ export class GolfScene extends Phaser.Scene {
     tableImg.destroy();
 
     if (player.id === this.golfGame.playerId) {
-      makeUnplayable(this.cards.deck);
+      this.makeUnplayable(this.cards.deck);
 
       if (this.cards.table[0]) {
-        makePlayable(this.cards.table[0], () => this.pushTableClick());
+        this.makePlayable(this.cards.table[0], () => this.pushCardClick("table"));
       }
 
       const hand = this.cards.hands[player.position];
-      hand.forEach((img, i) => makePlayable(img, () => this.pushHandClick(i)));
+      hand.forEach((img, i) => this.makePlayable(img, () => this.pushCardClick("hand", i)));
     }
   }
 
@@ -406,7 +453,7 @@ export class GolfScene extends Phaser.Scene {
 
     hand.forEach((cardImg, i) => {
       if (!isPlayable(game, `hand_${i}`)) {
-        makeUnplayable(cardImg);
+        this.makeUnplayable(cardImg);
       }
 
       // if the game is over, flip all the player's cards
@@ -417,21 +464,21 @@ export class GolfScene extends Phaser.Scene {
     });
 
     if (isPlayable(game, "deck")) {
-      makePlayable(this.cards.deck, () => this.pushDeckClick());
+      this.makePlayable(this.cards.deck, () => this.pushCardClick("deck"));
     }
 
     if (isPlayable(game, "table")) {
-      makePlayable(this.cards.table[0], () => this.pushTableClick());
+      this.makePlayable(this.cards.table[0], () => this.pushCardClick("table"));
     }
 
     if (this.cards.table[1]) {
-      makeUnplayable(this.cards.table[1]);
+      this.makeUnplayable(this.cards.table[1]);
     }
   }
 
   onSwap(game, player, event) {
     if (this.cards.table[0]) {
-      makeUnplayable(this.cards.table[0]);
+      this.makeUnplayable(this.cards.table[0]);
     }
 
     const hand = this.cards.hands[player.position];
@@ -466,48 +513,32 @@ export class GolfScene extends Phaser.Scene {
 
     if (player.id === game.playerId) {
       for (const cardImg of hand) {
-        makeUnplayable(cardImg);
+        this.makeUnplayable(cardImg);
       }
     }
 
     if (isPlayable(game, "deck")) {
-      makePlayable(this.cards.deck, () => this.pushDeckClick());
+      this.makePlayable(this.cards.deck, () => this.pushCardClick("deck"));
     }
 
     if (isPlayable(game, "table")) {
-      makePlayable(this.cards.table[0], () => this.pushTableClick());
+      this.makePlayable(this.cards.table[0], () => this.pushCardClick("table"));
     }
   }
 
   // client events
 
-  pushDeckClick() {
-    this.pushEvent("card_click", {
+  pushCardClick(place, handIndex = null) {
+    const data = {
       playerId: this.golfGame.playerId,
-      place: "deck"
-    });
-  }
+      place,
+    };
 
-  pushTableClick() {
-    this.pushEvent("card_click", {
-      playerId: this.golfGame.playerId,
-      place: "table",
-    });
-  }
+    if (handIndex !== null) {
+      data.handIndex = handIndex;
+    }
 
-  pushHandClick(handIndex) {
-    this.pushEvent("card_click", {
-      playerId: this.golfGame.playerId,
-      handIndex,
-      place: "hand",
-    });
-  }
-
-  pushHeldClick() {
-    this.pushEvent("card_click", {
-      playerId: this.golfGame.playerId,
-      place: "held",
-    });
+    this.pushEvent("card_click", data);
   }
 
   pushStartRound() {
@@ -516,19 +547,18 @@ export class GolfScene extends Phaser.Scene {
 
   // ui
 
-  createStartGameButton() {
+  createStartButton() {
     const width = 300;
     const height = 100;
     const radius = 20;
     const bgColor = 0x0000ff;
     const textColor = '#ffffff';
-    const margin = 40; // px from the bottom of the canvas
-    const x = GAME_WIDTH / 2 - width / 2;
-    const y = GAME_HEIGHT - height - margin;
+    const bgX = GAME_WIDTH / 2 - width / 2;
+    const bgY = GAME_HEIGHT * 0.85 - height / 2;
 
     this.startButton = {};
 
-    this.startButton.background = this.add.graphics({ x, y });
+    this.startButton.background = this.add.graphics({ x: bgX, y: bgY });
     this.startButton.background.fillStyle(bgColor, 1);
     this.startButton.background.fillRoundedRect(0, 0, width, height, radius);
     this.startButton.background.setInteractive(
@@ -536,7 +566,7 @@ export class GolfScene extends Phaser.Scene {
       Phaser.Geom.Rectangle.Contains
     );
 
-    this.startButton.text = this.add.text(GAME_WIDTH / 2, y + height / 2, 'Start Game', {
+    this.startButton.text = this.add.text(GAME_WIDTH / 2, bgY + height / 2, 'Start Game', {
       font: '48px monospace',
       fill: textColor
     }).setOrigin(0.5);
@@ -551,6 +581,31 @@ export class GolfScene extends Phaser.Scene {
     this.startButton.text.destroy();
     this.input.setDefaultCursor('default');
   }
+
+  makePlayable(cardImg, callback) {
+    cardImg.setTint(0x00ffff);
+    cardImg.setInteractive({ cursor: "pointer" });
+    cardImg.off("pointerdown");
+    cardImg.on("pointerdown", () => callback(cardImg));
+  }
+
+  makeUnplayable(cardImg) {
+    cardImg.clearTint();
+    cardImg.off("pointerdown");
+    cardImg.removeInteractive();
+  }
+
+  wiggleCard(cardImg) {
+    this.tweens.add({
+      targets: cardImg,
+      angle: { from: -1, to: 1 },
+      duration: 75,
+      yoyo: true,
+      repeat: 2,
+      ease: 'Sine.easeInOut',
+      onComplete: () => cardImg.setAngle(0),
+    });
+  }
 }
 
 // util
@@ -558,18 +613,3 @@ export class GolfScene extends Phaser.Scene {
 function isPlayable(game, cardPlace) {
   return game.playableCards.includes(cardPlace);
 }
-
-function makePlayable(cardImg, callback) {
-  cardImg.setTint(0x00ffff);
-  cardImg.setInteractive({ cursor: "pointer" });
-
-  cardImg.off("pointerdown");
-  cardImg.on("pointerdown", () => callback(cardImg));
-}
-
-function makeUnplayable(cardImg) {
-  cardImg.clearTint();
-  cardImg.off("pointerdown");
-  cardImg.removeInteractive();
-}
-

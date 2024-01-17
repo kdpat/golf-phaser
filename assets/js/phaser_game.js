@@ -22,7 +22,6 @@ const config = {
   },
   render: {
     roundPixels: true,
-  //   // mipmaps: true,
   },
   resolution: 2,
 };
