@@ -228,15 +228,15 @@ export class GolfScene extends Phaser.Scene {
         break;
 
       case "left":
-        text.x = CARD_HEIGHT + 8;
+        text.x = HAND_X_PAD;
         text.y = GAME_HEIGHT / 2 - CARD_HEIGHT * 2 - HAND_X_PAD;
-        text.setOrigin(0.5, 0.0);
+        text.setOrigin(0.0, 0.0);
         break;
 
       case "right":
-        text.x = GAME_WIDTH - CARD_HEIGHT - HAND_Y_PAD;
+        text.x = GAME_WIDTH;
         text.y = GAME_HEIGHT / 2 - CARD_HEIGHT * 2 - HAND_X_PAD;
-        text.setOrigin(0.5, 0.0);
+        text.setOrigin(1.0, 0);
         break;
 
       default:
@@ -523,6 +523,7 @@ export class GolfScene extends Phaser.Scene {
 
     handCardImg.x = this.cards.held.x;
     handCardImg.y = this.cards.held.y;
+    // handCardImg.angle = this.cards.held.angle;
 
     this.children.bringToTop(handCardImg);
     this.children.bringToTop(tableImg);
@@ -531,6 +532,7 @@ export class GolfScene extends Phaser.Scene {
       targets: handCardImg,
       x: hcX,
       y: hcY,
+      // angle: 0,
       duration: 750,
       ease: "Quad.easeInOut",
     });

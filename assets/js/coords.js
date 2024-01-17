@@ -150,73 +150,113 @@ function handCardLeftCoord(_width, height, index, xPad = HAND_X_PAD, yPad = HAND
 
   switch (index) {
     case 0:
-      x = CARD_WIDTH * 1.5 + yPad * 1.3;
+      x = CARD_WIDTH * 1.5 + xPad * 2;
       y = height / 2 - CARD_HEIGHT - xPad;
       break;
 
     case 1:
-      x = CARD_WIDTH * 1.5 + yPad * 1.3;
+      x = CARD_WIDTH * 1.5 + xPad * 2;
       y = height / 2;
       break;
 
     case 2:
-      x = CARD_WIDTH * 1.5 + yPad * 1.3;
+      x = CARD_WIDTH * 1.5 + xPad * 2;
       y = height / 2 + CARD_HEIGHT + xPad;
       break;
 
     case 3:
-      x = CARD_WIDTH / 2 + yPad;
+      x = CARD_WIDTH / 2 + xPad;
       y = height / 2 - CARD_HEIGHT - xPad;
       break;
 
     case 4:
-      x = CARD_WIDTH / 2 + yPad;
+      x = CARD_WIDTH / 2 + xPad;
       y = height / 2;
       break;
 
     case 5:
-      x = CARD_WIDTH / 2 + yPad;
+      x = CARD_WIDTH / 2 + xPad;
       y = height / 2 + CARD_HEIGHT + xPad;
       break;
   }
 
   return { x, y, rotation: 0 };
 }
+
+
 
 function handCardRightCoord(width, height, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   let x = 0, y = 0;
 
   switch (index) {
     case 0:
-      x = width - CARD_WIDTH * 1.5 - yPad * 1.3;
+      x = width - CARD_WIDTH * 1.5 - xPad * 2;
       y = height / 2 + CARD_HEIGHT + xPad;
       break;
 
     case 1:
-      x = width - CARD_WIDTH * 1.5 - yPad * 1.3;
+      x = width - CARD_WIDTH * 1.5 - xPad * 2;
       y = height / 2;
       break;
 
     case 2:
-      x = width - CARD_WIDTH * 1.5 - yPad * 1.3;
+      x = width - CARD_WIDTH * 1.5 - xPad * 2;
       y = height / 2 - CARD_HEIGHT - xPad;
       break;
 
     case 3:
-      x = width - CARD_WIDTH / 2 - yPad;
+      x = width - CARD_WIDTH / 2 - xPad;
       y = height / 2 + CARD_HEIGHT + xPad;
       break;
 
     case 4:
-      x = width - CARD_WIDTH / 2 - yPad;
+      x = width - CARD_WIDTH / 2 - xPad;
       y = height / 2;
       break;
 
     case 5:
-      x = width - CARD_WIDTH / 2 - yPad;
+      x = width - CARD_WIDTH / 2 - xPad;
       y = height / 2 - CARD_HEIGHT - xPad;
       break;
   }
 
   return { x, y, rotation: 0 };
 }
+
+// function handCardRightCoord(width, height, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
+//   let x = 0, y = 0;
+
+//   switch (index) {
+//     case 0:
+//       x = width - CARD_WIDTH * 1.5 - yPad * 1.3;
+//       y = height / 2 + CARD_HEIGHT + xPad;
+//       break;
+
+//     case 1:
+//       x = width - CARD_WIDTH * 1.5 - yPad * 1.3;
+//       y = height / 2;
+//       break;
+
+//     case 2:
+//       x = width - CARD_WIDTH * 1.5 - yPad * 1.3;
+//       y = height / 2 - CARD_HEIGHT - xPad;
+//       break;
+
+//     case 3:
+//       x = width - CARD_WIDTH / 2 - yPad;
+//       y = height / 2 + CARD_HEIGHT + xPad;
+//       break;
+
+//     case 4:
+//       x = width - CARD_WIDTH / 2 - yPad;
+//       y = height / 2;
+//       break;
+
+//     case 5:
+//       x = width - CARD_WIDTH / 2 - yPad;
+//       y = height / 2 - CARD_HEIGHT - xPad;
+//       break;
+//   }
+
+//   return { x, y, rotation: 0 };
+// }

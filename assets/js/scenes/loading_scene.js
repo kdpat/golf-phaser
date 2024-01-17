@@ -1,7 +1,5 @@
 import * as Phaser from "../../vendor/phaser.min.js";
 import { cardPath, CARD_NAMES, CARD_SCALE } from "../game.js";
-import { GAME_HEIGHT } from "../game.js";
-import { GAME_WIDTH } from "../game.js";
 import { BG_COLOR } from "../game.js";
 
 export class LoadingScene extends Phaser.Scene {

@@ -24,6 +24,7 @@ export function makeHandTweens(scene, width, height, cardImages, turn) {
       ease: "Quad.easeInOut",
       paused: true,
       delay,
+      // onStart: () => scene.children.bringToTop(cardImg),
     });
 
     tweens.push(tween);
