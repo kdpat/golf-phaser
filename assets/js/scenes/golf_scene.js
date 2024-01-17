@@ -23,76 +23,16 @@ export class GolfScene extends Phaser.Scene {
   }
 
   preload() {
-    this.cameras.main.setBackgroundColor(BG_COLOR);
+    this.camera = this.cameras.main;
+    this.camera.setBackgroundColor(BG_COLOR);
   }
 
   create() {
-    this.camera = this.cameras.main;
+    this.setupCamera();
+    this.setupMouseWheelZoom();
+    this.setupMouseDragging();
 
-    // setup mouse wheel zoom
-    this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-      const zoomFactor = 0.1;
-
-      if (deltaY > 0 && this.camera.zoom < 2) {
-        // scrolled up, zoom in
-        this.camera.zoom += zoomFactor;
-      } else if (deltaY < 0 && this.camera.zoom > 0.5) {
-        // scrolled down, zoom out
-        this.camera.zoom -= zoomFactor;
-      }
-    });
-
-    // setup mouse dragging
-    this.cameraBounds = {
-      minX: -600,
-      minY: -600,
-      maxX: 600,
-      maxY: 600
-    };
-
-    this.isDragging = false;
-    this.dragStartX = 0;
-    this.dragStartY = 0;
-
-    this.input.on('pointerdown', pointer => {
-      this.isDragging = true;
-      this.dragStartX = pointer.x;
-      this.dragStartY = pointer.y;
-    });
-
-    this.input.on('pointerupoutside', () => {
-      this.isDragging = false;
-    });
-
-    // listen for when the pointer is moved
-    this.input.on('pointermove', pointer => {
-      if (this.isDragging) {
-        const dragX = pointer.x - this.dragStartX;
-        const dragY = pointer.y - this.dragStartY;
-
-        // clamp camera
-        this.camera.scrollX = Phaser.Math.Clamp(
-          this.camera.scrollX - dragX,
-          this.cameraBounds.minX,
-          this.cameraBounds.maxX
-        );
-        this.camera.scrollY = Phaser.Math.Clamp(
-          this.camera.scrollY - dragY,
-          this.cameraBounds.minY,
-          this.cameraBounds.maxY
-        );
-
-        this.dragStartX = pointer.x;
-        this.dragStartY = pointer.y;
-      }
-    });
-
-    // listen for when the pointer is released
-    this.input.on('pointerup', () => {
-      this.isDragging = false;
-    });
-
-    // setup key listeners
+    // key listeners
     this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     // setup events listeners
@@ -111,35 +51,93 @@ export class GolfScene extends Phaser.Scene {
     }
   }
 
+  setupCamera() {
+    this.cameraBounds = {
+      minX: -600,
+      minY: -600,
+      maxX: 600,
+      maxY: 600
+    };
+  }
+
+  setupMouseWheelZoom() {
+    const zoomFactor = 0.1;
+    this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+      if (deltaY > 0 && this.camera.zoom < 2) {
+        this.camera.zoom += zoomFactor;
+      } else if (deltaY < 0 && this.camera.zoom > 0.5) {
+        this.camera.zoom -= zoomFactor;
+      }
+    });
+  }
+
+  setupMouseDragging() {
+    this.isDragging = false;
+    this.dragStartX = 0;
+    this.dragStartY = 0;
+
+    this.input.on('pointerdown', pointer => {
+      this.isDragging = true;
+      this.dragStartX = pointer.x;
+      this.dragStartY = pointer.y;
+    });
+
+    this.input.on('pointerupoutside', () => {
+      this.isDragging = false;
+    });
+
+    this.input.on('pointermove', pointer => {
+      if (this.isDragging) {
+        const dragX = pointer.x - this.dragStartX;
+        const dragY = pointer.y - this.dragStartY;
+        this.camera.scrollX = Phaser.Math.Clamp(
+          this.camera.scrollX - dragX,
+          this.cameraBounds.minX,
+          this.cameraBounds.maxX
+        );
+        this.camera.scrollY = Phaser.Math.Clamp(
+          this.camera.scrollY - dragY,
+          this.cameraBounds.minY,
+          this.cameraBounds.maxY
+        );
+
+        this.dragStartX = pointer.x;
+        this.dragStartY = pointer.y;
+      }
+    });
+
+    this.input.on('pointerup', () => {
+      this.isDragging = false;
+    });    
+  }
+
   // card sprites
 
   addCard(cardName, x, y, angle = 0) {
-    const img = this.add.image(x, y, cardName).setAngle(angle);
-    img.cardName = cardName;
-    return img;
+    return this.add.image(x, y, cardName).setAngle(angle);
   }
 
   addDeck(state) {
     const { x, y } = deckCoord(GAME_WIDTH, GAME_HEIGHT, state);
-    const img = this.addCard(DOWN_CARD, x, y);
-    this.cards.deck = img;
+    const deckImg = this.addCard(DOWN_CARD, x, y);
+    this.cards.deck = deckImg;
 
     if (isPlayable(this.golfGame, "deck")) {
-      makePlayable(img, () => this.pushDeckClick());
+      makePlayable(deckImg, () => this.pushDeckClick());
     }
   }
 
   addTableCard(card) {
     const { x, y } = tableCoord(GAME_WIDTH, GAME_HEIGHT);
-    const img = this.addCard(card, x, y);
+    const tableImg = this.addCard(card, x, y);
 
     // make old card unplayable
     if (this.cards.table[0]) {
       makeUnplayable(this.cards.table[0]);
     }
 
-    this.cards.table.unshift(img);
-    return img;
+    this.cards.table.unshift(tableImg);
+    return tableImg;
   }
 
   addTableCards() {
