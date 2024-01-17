@@ -1,5 +1,5 @@
 import * as Phaser from "../../vendor/phaser.min.js";
-import { DOWN_CARD, CARD_WIDTH, DECK_TABLE_OFFSET, BG_COLOR, GAME_WIDTH, GAME_HEIGHT, EMITTER, CARD_SCALE } from "../game.js";
+import { DOWN_CARD, CARD_WIDTH, DECK_TABLE_OFFSET, BG_COLOR, GAME_WIDTH, GAME_HEIGHT, EMITTER } from "../game.js";
 import { deckCoord, tableCoord, handCardCoord, heldCardCoord } from "../coords.js";
 import { makeHandTweens } from "../tweens.js";
 
@@ -322,6 +322,7 @@ export class GolfScene extends Phaser.Scene {
     this.golfGame = game;
     this.addHeldCard(player);
 
+    // tween held card from the deck
     const heldImg = this.cards.held;
     const x = heldImg.x;
     const y = heldImg.y;
@@ -352,6 +353,21 @@ export class GolfScene extends Phaser.Scene {
     this.golfGame = game;
     this.addHeldCard(player);
 
+    // tween held card from table
+    const heldImg = this.cards.held;
+    const x = heldImg.x;
+    const y = heldImg.y;
+    heldImg.x = this.cards.table[0].x;
+    heldImg.y = this.cards.table[0].y;
+
+    this.tweens.add({
+      targets: heldImg,
+      x,
+      y,
+      duration: 750,
+      ease: "Quad.easeInOut",
+    });
+
     const tableImg = this.cards.table.shift();
     tableImg.destroy();
 
@@ -370,6 +386,20 @@ export class GolfScene extends Phaser.Scene {
   onDiscard(game, player) {
     this.golfGame = game;
     this.addTableCard(game.tableCards[0]);
+
+    const tableImg = this.cards.table[0];
+    const x = tableImg.x;
+    const y = tableImg.y;
+    tableImg.x = this.cards.held.x;
+    tableImg.y = this.cards.held.y;
+
+    this.tweens.add({
+      targets: tableImg,
+      x,
+      y,
+      duration: 750,
+      ease: "Quad.easeInOut",
+    });
 
     this.cards.held.destroy();
     this.cards.held = null;
@@ -406,12 +436,24 @@ export class GolfScene extends Phaser.Scene {
       makeUnplayable(this.cards.table[0]);
     }
 
-    this.addTableCard(game.tableCards[0]);
-
     const hand = this.cards.hands[player.position];
     const cardImg = hand[event.hand_index]
     const cardName = player.hand[event.hand_index].name;
     cardImg.setTexture(cardName);
+
+    const tableImg = this.addTableCard(game.tableCards[0]);
+    const x = tableImg.x;
+    const y = tableImg.y;
+    tableImg.x = cardImg.x;
+    tableImg.y = cardImg.y;
+
+    this.tweens.add({
+      targets: tableImg,
+      x,
+      y,
+      duration: 750,
+      ease: "Quad.easeInOut",
+    });
 
     this.cards.held.destroy();
     this.cards.held = null;
