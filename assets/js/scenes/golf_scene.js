@@ -206,7 +206,7 @@ export class GolfScene extends Phaser.Scene {
     const color = playerColor(player);
 
     const textStyle = {
-      font: '40px monospace',
+      font: '50px monospace',
       fill: color,
     };
 

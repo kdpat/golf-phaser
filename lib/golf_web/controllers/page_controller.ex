@@ -6,7 +6,8 @@ defmodule GolfWeb.PageController do
   end
 
   def create_game(conn, _params) do
-    game = Golf.GamesDb.create_game(conn.assigns.user)
+    id = Golf.gen_id()
+    game = Golf.GamesDb.create_game(id, conn.assigns.user)
     redirect(conn, to: ~p"/game/#{game.id}")
   end
 end

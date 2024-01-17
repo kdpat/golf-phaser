@@ -4,11 +4,12 @@ defmodule Golf.Games.Game do
 
   alias Golf.Users.User
 
+  @primary_key {:id, :string, []}
+
   schema "games" do
     belongs_to :host, Golf.Users.User
     has_many :players, Golf.Games.Player
     has_many :rounds, Golf.Games.Round
-
     timestamps(type: :utc_datetime)
   end
 
@@ -19,13 +20,13 @@ defmodule Golf.Games.Game do
     |> validate_required([:host_id])
   end
 
-  def new_changeset(%User{} = host) do
+  def new_changeset(id, %User{} = host) do
     player = %{user_id: host.id, turn: 0}
-    params = %{host_id: host.id, players: [player]}
+    params = %{id: id, host_id: host.id, players: [player]}
 
     %__MODULE__{}
-    |> cast(params, [:host_id])
+    |> cast(params, [:id, :host_id])
     |> cast_assoc(:players)
-    |> validate_required([:host_id])
+    |> validate_required([:id, :host_id])
   end
 end

@@ -13,7 +13,7 @@ defmodule Golf.Games.Round do
     field :held_card, :map
     field :first_player_index, :integer
 
-    belongs_to :game, Golf.Games.Game
+    belongs_to :game, Golf.Games.Game, type: :string
     belongs_to :first_player_out, Golf.Games.Player
     has_many :events, Golf.Games.Event
 

@@ -8,8 +8,9 @@ defmodule Golf.GamesDbTest do
     import Golf.UsersFixtures
 
     test "two player game" do
+      id = Golf.gen_id()
       user0 = user_fixture()
-      game = GamesDb.create_game(user0)
+      game = GamesDb.create_game(id, user0)
 
       user1 = user_fixture(%{name: "bob"})
       {:ok, game} = GamesDb.add_player(game, user1)
@@ -76,6 +77,7 @@ defmodule Golf.GamesDbTest do
 
       # round = Games.current_round(game) |> Map.drop([:events])
       # dbg(round)
+      # dbg(game)
     end
   end
 end

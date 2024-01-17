@@ -2,15 +2,14 @@ defmodule Golf.Repo.Migrations.CreateGames do
   use Ecto.Migration
 
   def change do
-    create table(:games) do
+    create table(:games, primary_key: false) do
+      add :id, :string, primary_key: true
       add :host_id, references(:users)
       timestamps(type: :utc_datetime)
     end
 
-    create index(:games, [:host_id])
-
     create table(:players) do
-      add :game_id, references(:games)
+      add :game_id, references(:games, type: :string)
       add :user_id, references(:users)
       add :turn, :integer
       timestamps(type: :utc_datetime)
@@ -20,7 +19,7 @@ defmodule Golf.Repo.Migrations.CreateGames do
     create unique_index(:players, [:game_id, :turn])
 
     create table(:rounds) do
-      add :game_id, references(:games)
+      add :game_id, references(:games, type: :string)
       add :first_player_out_id, references(:players)
       add :state, :string
       add :turn, :integer
