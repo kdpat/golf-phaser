@@ -45,3 +45,6 @@ export function cardNames() {
 export function cardPath(name) {
   return `/images/cards/svg/${name}.svg`;
 }
+
+export const PLAYER_TURN_COLOR = "#00ff00";
+export const NOT_PLAYER_TURN_COLOR = "#ff77ff";
