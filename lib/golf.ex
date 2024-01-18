@@ -22,4 +22,12 @@ defmodule Golf do
     |> Integer.to_string(36)
     |> String.downcase()
   end
+
+  def subscribe!(topic) do
+    :ok = Phoenix.PubSub.subscribe(Golf.PubSub, topic)
+  end
+
+  def broadcast!(topic, msg) do
+    Phoenix.PubSub.broadcast!(Golf.PubSub, topic, msg)
+  end
 end

@@ -38,7 +38,7 @@ defmodule GolfWeb.GameLive do
          |> put_flash(:error, "Game #{id} not found.")}
 
       game ->
-        subscribe!(topic(game.id))
+        Golf.subscribe!(topic(game.id))
         data = GameData.new(game, socket.assigns.user)
 
         {:noreply,
@@ -71,7 +71,7 @@ defmodule GolfWeb.GameLive do
   def handle_event("start_round", _params, socket)
       when socket.assigns.user.id == socket.assigns.game.host_id do
     {:ok, game} = GamesDb.create_round(socket.assigns.game)
-    broadcast!(topic(game.id), {:round_started, game})
+    Golf.broadcast!(topic(game.id), {:round_started, game})
     {:noreply, socket}
   end
 
@@ -85,19 +85,11 @@ defmodule GolfWeb.GameLive do
     event = Event.new(player.id, action, params["handIndex"])
     {:ok, game} = GamesDb.handle_event(game, event)
 
-    broadcast!(topic(game.id), {:game_event, game, event})
+    Golf.broadcast!(topic(game.id), {:game_event, game, event})
     {:noreply, socket}
   end
 
   defp topic(game_id), do: "game:#{game_id}"
-
-  defp subscribe!(topic) do
-    :ok = Phoenix.PubSub.subscribe(Golf.PubSub, topic)
-  end
-
-  defp broadcast!(topic, msg) do
-    Phoenix.PubSub.broadcast!(Golf.PubSub, topic, msg)
-  end
 
   defp action_at(state, "hand") when state in [:flip_2, :flip], do: :flip
   defp action_at(:take, "table"), do: :take_table

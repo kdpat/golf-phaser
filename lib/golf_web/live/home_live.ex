@@ -23,7 +23,7 @@ defmodule GolfWeb.HomeLive do
   @impl true
   def handle_event("create_lobby", _params, socket) do
     id = Golf.gen_id()
-    _game = Golf.GamesDb.create_game(id, socket.assigns.user)
-    {:noreply, redirect(socket, to: ~p"/game/#{id}")}
+    _lobby = Golf.Lobbies.create_lobby(id, socket.assigns.user)
+    {:noreply, push_navigate(socket, to: ~p"/lobby/#{id}")}
   end
 end

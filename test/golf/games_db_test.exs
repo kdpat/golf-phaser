@@ -9,11 +9,15 @@ defmodule Golf.GamesDbTest do
 
     test "two player game" do
       id = Golf.gen_id()
-      user0 = user_fixture()
-      game = GamesDb.create_game(id, user0)
+      # user0 = user_fixture()
+      # game = GamesDb.create_game(id, user0)
 
+      # user1 = user_fixture(%{name: "bob"})
+      # {:ok, game} = GamesDb.add_player(game, user1)
+
+      user0 = user_fixture(%{name: "alice"})
       user1 = user_fixture(%{name: "bob"})
-      {:ok, game} = GamesDb.add_player(game, user1)
+      game = GamesDb.create_game(id, user0, [user0, user1])
 
       found_game = GamesDb.get_game(game.id)
       assert game == found_game
@@ -75,8 +79,6 @@ defmodule Golf.GamesDbTest do
 
       assert game == GamesDb.get_game(game.id)
 
-      # round = Games.current_round(game) |> Map.drop([:events])
-      # dbg(round)
       # dbg(game)
     end
   end

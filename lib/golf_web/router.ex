@@ -24,6 +24,7 @@ defmodule GolfWeb.Router do
     post "/game", PageController, :create_game
 
     live "/", HomeLive
+    live "/lobby/:id", LobbyLive
     live "/game/:id", GameLive
   end
 

@@ -20,9 +20,13 @@ defmodule Golf.Games.Game do
     |> validate_required([:host_id])
   end
 
-  def new_changeset(id, %User{} = host) do
-    player = %{user_id: host.id, turn: 0}
-    params = %{id: id, host_id: host.id, players: [player]}
+  def new_changeset(id, %User{} = host, users) do
+    players =
+      users
+      |> Enum.with_index()
+      |> Enum.map(fn {user, i} -> %{user_id: user.id, turn: i} end)
+
+    params = %{id: id, host_id: host.id, players: players}
 
     %__MODULE__{}
     |> cast(params, [:id, :host_id])

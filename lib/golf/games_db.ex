@@ -48,8 +48,8 @@ defmodule Golf.GamesDb do
     Game.changeset(game, attrs)
   end
 
-  def create_game(id, %User{} = host) do
-    Game.new_changeset(id, host)
+  def create_game(id, %User{} = host, users) do
+    Game.new_changeset(id, host, users)
     |> Repo.insert!()
     |> Repo.preload(@game_preloads)
   end
