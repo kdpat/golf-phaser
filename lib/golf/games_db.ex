@@ -24,6 +24,11 @@ defmodule Golf.GamesDb do
     |> Repo.preload(preloads)
   end
 
+  def game_exists?(id) do
+    from(g in Game, where: [id: ^id])
+    |> Repo.exists?()
+  end
+
   def list_games do
     Repo.all(Game)
   end

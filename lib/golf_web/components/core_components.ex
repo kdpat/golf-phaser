@@ -152,28 +152,28 @@ defmodule GolfWeb.CoreComponents do
     """
   end
 
-# <.flash
-#   id="client-error"
-#   kind={:error}
-#   title="We can't find the internet"
-#   phx-disconnected={show(".phx-client-error #client-error")}
-#   phx-connected={hide("#client-error")}
-#   hidden
-# >
-#   Attempting to reconnect <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
-# </.flash>
+  # <.flash
+  #   id="client-error"
+  #   kind={:error}
+  #   title="We can't find the internet"
+  #   phx-disconnected={show(".phx-client-error #client-error")}
+  #   phx-connected={hide("#client-error")}
+  #   hidden
+  # >
+  #   Attempting to reconnect <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
+  # </.flash>
 
-# <.flash
-#   id="server-error"
-#   kind={:error}
-#   title="Something went wrong!"
-#   phx-disconnected={show(".phx-server-error #server-error")}
-#   phx-connected={hide("#server-error")}
-#   hidden
-# >
-#   Hang in there while we get back on track
-#   <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
-# </.flash>
+  # <.flash
+  #   id="server-error"
+  #   kind={:error}
+  #   title="Something went wrong!"
+  #   phx-disconnected={show(".phx-server-error #server-error")}
+  #   phx-connected={hide("#server-error")}
+  #   hidden
+  # >
+  #   Hang in there while we get back on track
+  #   <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
+  # </.flash>
 
   @doc """
   Renders a simple form.

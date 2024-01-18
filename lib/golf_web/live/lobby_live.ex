@@ -16,7 +16,17 @@ defmodule GolfWeb.LobbyLive do
         </ol>
       </div>
 
-      <button phx-click="start_game">Start Game</button>
+      <!--
+      @game_exists? will be nil on mount, and true or false after the db is checked.
+      If it's nil we don't want to show it, so explicitly check for false.
+      -->
+      <button :if={@host? && @game_exists? == false} phx-click="start_game">
+        Start Game
+      </button>
+
+      <button :if={@game_exists?} phx-click="go_to_game">
+        Go To Game
+      </button>
     </div>
     """
   end
@@ -27,11 +37,12 @@ defmodule GolfWeb.LobbyLive do
 
     if connected?(socket) do
       send(self(), {:load_lobby, id})
+      send(self(), {:load_game_exists?, id})
     end
 
     {:ok,
      socket
-     |> assign(page_title: "Lobby", id: id, user: user, lobby: nil)
+     |> assign(page_title: "Lobby", id: id, user: user, lobby: nil, host?: nil, game_exists?: nil)
      |> stream(:users, [])}
   end
 
@@ -45,20 +56,32 @@ defmodule GolfWeb.LobbyLive do
          |> push_navigate(to: ~p"/")}
 
       lobby ->
+        host? = socket.assigns.user.id == lobby.host_id
+
         {:noreply,
          socket
-         |> assign(lobby: lobby)
+         |> assign(lobby: lobby, host?: host?)
          |> stream(:users, lobby.users)}
     end
   end
 
   @impl true
+  def handle_info({:load_game_exists?, id}, socket) do
+    exists? = Golf.GamesDb.game_exists?(id)
+    {:noreply, assign(socket, game_exists?: exists?)}
+  end
+
+  @impl true
   def handle_event("start_game", _params, socket) do
     id = socket.assigns.id
-    lobby = socket.assigns.lobby
-    game = Golf.GamesDb.create_game(id, socket.assigns.user, lobby.users)
+    game = Golf.GamesDb.create_game(id, socket.assigns.user, socket.assigns.lobby.users)
     Golf.broadcast!(topic(id), {:game_created, game})
     {:noreply, redirect(socket, to: ~p"/game/#{id}")}
+  end
+
+  @impl true
+  def handle_event("go_to_game", _params, socket) do
+    {:noreply, redirect(socket, to: ~p"/game/#{socket.assigns.id}")}
   end
 
   defp topic(id), do: "lobby:#{id}"

@@ -15,4 +15,10 @@ defmodule Golf.Users.User do
     |> cast(attrs, [:session_id, :name])
     |> validate_required([:session_id, :name])
   end
+
+  def username_changeset(%__MODULE__{} = user, attrs) do
+    user
+    |> cast(attrs, [:username])
+    |> validate_length(:username, min: 1, max: 16)
+  end
 end
