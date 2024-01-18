@@ -4,21 +4,25 @@ import { GolfScene } from "./scenes/golf_scene.js";
 import { GAME_WIDTH, GAME_HEIGHT } from "./game.js";
 
 const PARENT_ID = "game-canvas";
-const CANVAS_ID = "game-canvas-canvas";
-const CANVAS = document.getElementById(CANVAS_ID)
+const SCALE_MODE = Phaser.Scale.FIT;
+
+// const WIDTH_THRESHOLD = 600;
+// const SCALE_MODE =
+//   window.innerWidth <= WIDTH_THRESHOLD
+//     ? Phaser.Scale.RESIZE_ALL
+//     : Phaser.Scale.FIT;
 
 const config = {
   type: Phaser.WEBGL,
-  canvas: CANVAS,
+  parent: PARENT_ID,
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
   transparent: true,
   scene: [LoadingScene, GolfScene],
   scale: {
     parent: PARENT_ID,
-    mode: Phaser.Scale.FIT,
-    // mode: Phaser.Scale.RESIZE_ALL,
-    // autoCenter: Phaser.Scale.CENTER_BOTH,
+    mode: SCALE_MODE,
+    autoCenter: Phaser.Scale.CENTER_Y,
   },
   render: {
     roundPixels: true,

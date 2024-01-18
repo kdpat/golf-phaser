@@ -4,7 +4,7 @@ defmodule GolfWeb.LobbyLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div>
+    <div id="lobby-page">
       <h2>Lobby <%= @id %></h2>
 
       <div class="players">
@@ -15,7 +15,6 @@ defmodule GolfWeb.LobbyLive do
           </li>
         </ol>
       </div>
-
       <!--
       @game_exists? will be nil on mount, and true or false after the db is checked.
       If it's nil we don't want to show it, so explicitly check for false.
@@ -56,6 +55,7 @@ defmodule GolfWeb.LobbyLive do
          |> push_navigate(to: ~p"/")}
 
       lobby ->
+        Golf.subscribe!(topic(id))
         host? = socket.assigns.user.id == lobby.host_id
 
         {:noreply,
@@ -69,6 +69,15 @@ defmodule GolfWeb.LobbyLive do
   def handle_info({:load_game_exists?, id}, socket) do
     exists? = Golf.GamesDb.game_exists?(id)
     {:noreply, assign(socket, game_exists?: exists?)}
+  end
+
+  @impl true
+  def handle_info({:user_joined, lobby, new_user}, socket) do
+    {:noreply,
+     socket
+     |> assign(lobby: lobby)
+     |> stream_insert(:users, new_user)
+     |> put_flash(:info, "User joined: #{new_user.name}")}
   end
 
   @impl true

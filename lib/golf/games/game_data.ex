@@ -31,7 +31,7 @@ defmodule Golf.Games.GameData do
       game.players
       |> put_hands_scores(round && round.hands)
       |> maybe_rotate(player_index)
-      |> Enum.map(&put_player_data(&1, round))
+      |> Enum.map(&put_round_data(&1, round))
       |> Enum.zip_with(positions, &Map.put(&1, :position, &2))
 
     playable_cards =
@@ -73,12 +73,11 @@ defmodule Golf.Games.GameData do
     end
   end
 
-  defp put_player_data(player, nil) do
-    player
-    |> Map.put(:can_act?, false)
+  defp put_round_data(player, nil) do
+    Map.put(player, :can_act?, false)
   end
 
-  defp put_player_data(player, round) do
+  defp put_round_data(player, round) do
     player
     |> maybe_put_held_card(round && round.held_card)
     |> Map.put(:can_act?, Games.can_act_round?(round, player))

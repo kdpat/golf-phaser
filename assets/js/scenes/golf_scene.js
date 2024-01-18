@@ -141,7 +141,6 @@ export class GolfScene extends Phaser.Scene {
     const { x, y } = tableCoord(GAME_WIDTH, GAME_HEIGHT);
     const tableImg = this.addCard(card, x, y);
 
-    // make old card unplayable
     if (this.cards.table[0]) {
       makeUnplayable(this.cards.table[0]);
     }
@@ -160,29 +159,29 @@ export class GolfScene extends Phaser.Scene {
     }
 
     if (card0) {
-      const img = this.addTableCard(card0);
+      const tableImg = this.addTableCard(card0);
 
       if (this.isPlayable("table")) {
-        makePlayable(img, () => this.pushCardClick("table"));
+        makePlayable(tableImg, () => this.pushCardClick("table"));
       }
     }
   }
 
   addHand(player) {
-    const hand = this.cards.hands[player.position];
+    const handImages = this.cards.hands[player.position];
 
     player.hand.forEach((card, index) => {
       const cardName = card["face_up?"] ? card.name : DOWN_CARD;
       const { x, y, rotation } = handCardCoord(GAME_WIDTH, GAME_HEIGHT, player.position, index);
       const cardImg = this.addCard(cardName, x, y, rotation);
-      hand[index] = cardImg;
+      handImages[index] = cardImg;
 
-      if (this.isPlayable(`hand_${index}`)) {
+      if (player.id === this.golfGame.playerId && this.isPlayable(`hand_${index}`)) {
         makePlayable(cardImg, () => this.pushCardClick("hand", index));
       }
     });
 
-    return hand;
+    return handImages;
   }
 
   addHeldCard(player) {
@@ -196,11 +195,7 @@ export class GolfScene extends Phaser.Scene {
     const tableImg = this.cards.table[0];
 
     if (tableImg && this.isPlayable("held")) {
-      // TODO find better names
-      // originally the user clicked on the held card to send a discard event
-      // it feels more natural to click the table instead, so we'll set up the handler on the table image
-      // the tableImg will call onTableClick when "table" is in playableCards, and onHeldClick when "held" is in playableCards
-      makePlayable(tableImg, () => this.pushCardClick("held"));
+      makePlayable(tableImg, () => this.pushCardClick("table"));
     }
   }
 
@@ -213,40 +208,40 @@ export class GolfScene extends Phaser.Scene {
     };
 
     const points = player.score == 1 || player.score == -1 ? "pt" : "pts";
-    const playerInfo = `${player.user.name}(${player.score}${points})`;
-    const text = this.add.text(0, 0, playerInfo, textStyle);
+    const textStr = `${player.user.name}(${player.score}${points})`;
+    const textObj = this.add.text(0, 0, textStr, textStyle);
 
     switch (player.position) {
       case "bottom":
-        text.x = GAME_WIDTH / 2;
-        text.y = GAME_HEIGHT - 20;
-        text.setOrigin(0.5, 1);
+        textObj.x = GAME_WIDTH / 2;
+        textObj.y = GAME_HEIGHT - 20;
+        textObj.setOrigin(0.5, 1);
         break;
 
       case "top":
-        text.x = GAME_WIDTH / 2;
-        text.y = 20;
-        text.setOrigin(0.5, 0.0);
+        textObj.x = GAME_WIDTH / 2;
+        textObj.y = 20;
+        textObj.setOrigin(0.5, 0.0);
         break;
 
       case "left":
-        text.x = HAND_X_PAD;
-        text.y = GAME_HEIGHT / 2 - CARD_HEIGHT * 2 - HAND_X_PAD;
-        text.setOrigin(0.0, 0.0);
+        textObj.x = HAND_X_PAD;
+        textObj.y = GAME_HEIGHT / 2 - CARD_HEIGHT * 2 - HAND_X_PAD;
+        textObj.setOrigin(0.0, 0.0);
         break;
 
       case "right":
-        text.x = GAME_WIDTH;
-        text.y = GAME_HEIGHT / 2 - CARD_HEIGHT * 2 - HAND_X_PAD;
-        text.setOrigin(1.0, 0);
+        textObj.x = GAME_WIDTH;
+        textObj.y = GAME_HEIGHT / 2 - CARD_HEIGHT * 2 - HAND_X_PAD;
+        textObj.setOrigin(1.0, 0);
         break;
 
       default:
         throw new Error(`invalid position: ${pos}`);
     }
 
-    this.playerTexts[player.position] = text;
-    return text;
+    this.playerTexts[player.position] = textObj;
+    return textObj;
   }
 
   updatePlayerTexts() {
@@ -256,12 +251,13 @@ export class GolfScene extends Phaser.Scene {
   }
 
   updatePlayerText(player) {
-    const text = this.playerTexts[player.position];
-    const color = playerColor(player);
     const points = player.score == 1 || player.score == -1 ? "pt" : "pts";
-    const playerInfo = `${player.user.name}(${player.score}${points})`;
-    text.setText(playerInfo);
-    text.setColor(color);
+    const textStr = `${player.user.name}(${player.score}${points})`;
+    const textObj = this.playerTexts[player.position];
+    textObj.setText(textStr);
+
+    const color = playerColor(player);
+    textObj.setColor(color);
   }
 
   // server events
@@ -300,8 +296,8 @@ export class GolfScene extends Phaser.Scene {
     let handsTweens = [];
 
     game.players.forEach((player, i) => {
-      const hand = this.addHand(player);
-      const tweens = makeHandTweens(this, GAME_WIDTH, GAME_HEIGHT, hand, i);
+      const handImages = this.addHand(player);
+      const tweens = makeHandTweens(this, GAME_WIDTH, GAME_HEIGHT, handImages, i);
       handsTweens.push(tweens);
 
       this.updatePlayerText(player);
@@ -372,15 +368,15 @@ export class GolfScene extends Phaser.Scene {
   }
 
   onFlip(game, player, event) {
-    const hand = this.cards.hands[player.position];
-    const cardImg = hand[event.hand_index];
+    const handImages = this.cards.hands[player.position];
+    const cardImg = handImages[event.hand_index];
 
     const cardName = player.hand[event.hand_index].name;
     cardImg.setTexture(cardName);
 
     this.wiggleCard(cardImg);
 
-    hand.forEach((img, i) => {
+    handImages.forEach((img, i) => {
       if (!this.isPlayable(`hand_${i}`)) {
         makeUnplayable(img);
       }
@@ -478,9 +474,9 @@ export class GolfScene extends Phaser.Scene {
     this.cards.held.destroy();
     this.cards.held = null;
 
-    const hand = this.cards.hands[player.position];
+    const handImages = this.cards.hands[player.position];
 
-    hand.forEach((cardImg, i) => {
+    handImages.forEach((cardImg, i) => {
       if (!this.isPlayable(`hand_${i}`)) {
         makeUnplayable(cardImg);
       }
@@ -510,8 +506,8 @@ export class GolfScene extends Phaser.Scene {
       makeUnplayable(this.cards.table[0]);
     }
 
-    const hand = this.cards.hands[player.position];
-    const handCardImg = hand[event.hand_index]
+    const handImages = this.cards.hands[player.position];
+    const handCardImg = handImages[event.hand_index]
     const cardName = player.hand[event.hand_index].name;
     handCardImg.setTexture(cardName);
     const hcX = handCardImg.x;
@@ -552,14 +548,14 @@ export class GolfScene extends Phaser.Scene {
 
     // if this is the last round, flip all the player's cards
     if (game.isFlipped) {
-      hand.forEach((cardImg, i) => {
+      handImages.forEach((cardImg, i) => {
         const cardName = player.hand[i].name;
         cardImg.setTexture(cardName);
       });
     }
 
     if (player.id === game.playerId) {
-      for (const cardImg of hand) {
+      for (const cardImg of handImages) {
         makeUnplayable(cardImg);
       }
     }

@@ -6,7 +6,7 @@
 html,
 body {
   height: 100%;
-  text-align: center;
+  /* text-align: center; */
 }
 
 #game-canvas {
@@ -17,4 +17,13 @@ body {
 
 header {
   height: 1.5rem;
+  text-align: center;
+}
+
+#home-page {
+  text-align: center;
+}
+
+#lobby-page {
+  text-align: center;
 }

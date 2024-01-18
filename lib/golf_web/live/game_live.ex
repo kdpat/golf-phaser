@@ -7,9 +7,8 @@ defmodule GolfWeb.GameLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="game">
+    <div class="game-page">
       <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore">
-        <canvas id="game-canvas-canvas"></canvas>
       </div>
     </div>
     """
