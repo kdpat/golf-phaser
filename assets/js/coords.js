@@ -35,8 +35,8 @@ export function heldCardCoord(width, height, pos, xPad = HAND_X_PAD, yPad = HAND
       break;
 
     case "left":
-      x = CARD_WIDTH + yPad + 5;
-      y = height / 2 + CARD_HEIGHT * 1.5 + xPad;
+      x = CARD_WIDTH + xPad * 2;
+      y = height / 2 + CARD_HEIGHT * 1.5 + xPad + 2;
       break;
 
     case "right":
@@ -183,8 +183,6 @@ function handCardLeftCoord(_width, height, index, xPad = HAND_X_PAD, yPad = HAND
   return { x, y, rotation: 0 };
 }
 
-
-
 function handCardRightCoord(width, height, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   let x = 0, y = 0;
 
@@ -222,3 +220,23 @@ function handCardRightCoord(width, height, index, xPad = HAND_X_PAD, yPad = HAND
 
   return { x, y, rotation: 0 };
 }
+
+export function playerTextCoord(width, height, position) {
+  switch (position) {
+    case "bottom":
+      return { x: width / 2, y: height - 20, originX: 0.5, originY: 1 };
+
+    case "top":
+      return { x: width / 2, y: 20, originX: 0.5, originY: 0.0 };
+
+    case "left":
+      return { x: HAND_X_PAD, y: height / 2 - CARD_HEIGHT * 2 - HAND_X_PAD, originX: 0.0, originY: 0.0 };
+
+    case "right":
+      return { x: width, y: height / 2 - CARD_HEIGHT * 2 - HAND_X_PAD, originX: 1.0, originY: 0 };
+
+    default:
+      throw new Error(`invalid position: ${position}`);
+  }
+}
+

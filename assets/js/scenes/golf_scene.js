@@ -1,6 +1,6 @@
 import * as Phaser from "../../vendor/phaser.min.js";
-import { DOWN_CARD, CARD_NAMES, cardPath, CARD_SCALE, CARD_HEIGHT, CARD_WIDTH, DECK_TABLE_OFFSET, BG_COLOR, GAME_WIDTH, GAME_HEIGHT, EMITTER, HAND_Y_PAD, HAND_X_PAD } from "../game.js";
-import { deckCoord, tableCoord, handCardCoord, heldCardCoord } from "../coords.js";
+import { DOWN_CARD, CARD_HEIGHT, CARD_WIDTH, DECK_TABLE_OFFSET, BG_COLOR, GAME_WIDTH, GAME_HEIGHT, EMITTER, HAND_X_PAD } from "../game.js";
+import { deckCoord, tableCoord, handCardCoord, heldCardCoord, playerTextCoord } from "../coords.js";
 import { makeHandTweens } from "../tweens.js";
 import { PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR } from "../game.js";
 
@@ -211,34 +211,9 @@ export class GolfScene extends Phaser.Scene {
     const textStr = `${player.user.name}(${player.score}${points})`;
     const textObj = this.add.text(0, 0, textStr, textStyle);
 
-    switch (player.position) {
-      case "bottom":
-        textObj.x = GAME_WIDTH / 2;
-        textObj.y = GAME_HEIGHT - 20;
-        textObj.setOrigin(0.5, 1);
-        break;
-
-      case "top":
-        textObj.x = GAME_WIDTH / 2;
-        textObj.y = 20;
-        textObj.setOrigin(0.5, 0.0);
-        break;
-
-      case "left":
-        textObj.x = HAND_X_PAD;
-        textObj.y = GAME_HEIGHT / 2 - CARD_HEIGHT * 2 - HAND_X_PAD;
-        textObj.setOrigin(0.0, 0.0);
-        break;
-
-      case "right":
-        textObj.x = GAME_WIDTH;
-        textObj.y = GAME_HEIGHT / 2 - CARD_HEIGHT * 2 - HAND_X_PAD;
-        textObj.setOrigin(1.0, 0);
-        break;
-
-      default:
-        throw new Error(`invalid position: ${pos}`);
-    }
+    const { x, y, originX, originY } = playerTextCoord(GAME_WIDTH, GAME_HEIGHT, player.position);
+    textObj.setPosition(x, y);
+    textObj.setOrigin(originX, originY);
 
     this.playerTexts[player.position] = textObj;
     return textObj;
@@ -523,8 +498,8 @@ export class GolfScene extends Phaser.Scene {
     handCardImg.y = this.cards.held.y;
     // handCardImg.angle = this.cards.held.angle;
 
-    this.children.bringToTop(handCardImg);
     this.children.bringToTop(tableImg);
+    this.children.bringToTop(handCardImg);
 
     this.tweens.add({
       targets: handCardImg,
@@ -533,6 +508,9 @@ export class GolfScene extends Phaser.Scene {
       // angle: 0,
       duration: 750,
       ease: "Quad.easeInOut",
+      // onStart: () => {
+      //   setTimeout(() => this.wiggleCard(handCardImg), 400);
+      // },
     });
 
     this.tweens.add({
@@ -540,7 +518,7 @@ export class GolfScene extends Phaser.Scene {
       x,
       y,
       duration: 750,
-      ease: "Quad.easeInOut",
+      ease: "Quad.easeInOut",    
     });
 
     this.cards.held.destroy();
@@ -625,11 +603,11 @@ export class GolfScene extends Phaser.Scene {
     this.input.setDefaultCursor('default');
   }
 
-  wiggleCard(cardImg) {
-    this.tweens.add({
+  wiggleCard(cardImg, duration = 75) {
+    return this.tweens.add({
       targets: cardImg,
       angle: { from: -1, to: 1 },
-      duration: 75,
+      duration,
       yoyo: true,
       repeat: 2,
       ease: 'Sine.easeInOut',
