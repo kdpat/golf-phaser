@@ -81,6 +81,11 @@ defmodule GolfWeb.LobbyLive do
   end
 
   @impl true
+  def handle_info({:game_created, game}, socket) do
+    {:noreply, redirect(socket, to: ~p"/game/#{game.id}")}
+  end
+
+  @impl true
   def handle_event("start_game", _params, socket) do
     id = socket.assigns.id
     game = Golf.GamesDb.create_game(id, socket.assigns.user, socket.assigns.lobby.users)

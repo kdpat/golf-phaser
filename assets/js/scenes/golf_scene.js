@@ -268,18 +268,27 @@ export class GolfScene extends Phaser.Scene {
       this.destroyStartGameButton();
     }
 
-    let handsTweens = [];
+    const firstPlayerIndex = game.players.findIndex(p => p.id == game.firstPlayerId);
+    if (firstPlayerIndex == null) throw new Error("First player index is null.");
 
-    game.players.forEach((player, i) => {
+    const players = rotate(game.players, firstPlayerIndex);
+    const handsTweens = [];
+
+    // we want the first players cards on top, so draw the cards last player to first
+    for (let i = players.length - 1; i >= 0; i--) {
+      const player = players[i];
       const handImages = this.addHand(player);
       const tweens = makeHandTweens(this, GAME_WIDTH, GAME_HEIGHT, handImages, i);
       handsTweens.push(tweens);
-
       this.updatePlayerText(player);
-    });
+    }
+
+    // reverse the tweens so they still happen first to last
+    handsTweens.reverse();
 
     handsTweens.forEach((handTweens, playerIndex) => {
       handTweens.forEach((tween, cardIndex) => {
+        // tween.targets.forEach((img, i) => img.setDepth(i))
         // start tweening the deck after dealing to the last player
         if (playerIndex === game.players.length - 1 && cardIndex === 5) {
           tween.setCallback("onComplete", () => {
@@ -518,7 +527,7 @@ export class GolfScene extends Phaser.Scene {
       x,
       y,
       duration: 750,
-      ease: "Quad.easeInOut",    
+      ease: "Quad.easeInOut",
     });
 
     this.cards.held.destroy();
@@ -637,4 +646,8 @@ function playerColor(player) {
   return player["can_act?"]
     ? PLAYER_TURN_COLOR
     : NOT_PLAYER_TURN_COLOR;
+}
+
+function rotate(arr, n) {
+  return arr.slice(n).concat(arr.slice(0, n));
 }

@@ -282,7 +282,7 @@ defmodule Golf.Games do
       when is_integer(round.first_player_out_id) do
     held_card = round.held_card["name"]
     table_cards = [held_card | round.table_cards]
-    {hands, _} = update_hand(round, event.player_id, &flip_all/1)
+    {hands, _} = update_hand(round.hands, event.player_id, &flip_all/1)
 
     {state, turn} =
       if Enum.all?(Map.values(hands), &all_face_up?/1) do
