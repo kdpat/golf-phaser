@@ -29,6 +29,17 @@ hooks.GameCanvas = {
   }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  const sidebar = document.getElementById('toggle-sidebar');
+  const gameInfo = document.getElementById('game-info');
+
+  if (sidebar) {
+    sidebar.addEventListener('click', () => {
+      gameInfo.classList.toggle('active');
+    });
+  }
+});
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
 let liveSocket = new LiveSocket(

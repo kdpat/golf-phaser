@@ -13,12 +13,11 @@ export class LoadingScene extends Phaser.Scene {
   preload() {
     this.cameras.main.setBackgroundColor(BG_COLOR);
     this.setupLoadingBar();
+    this.load.on('progress', this.updateLoadingBar, this);
 
     for (const card of CARD_NAMES) {
       this.load.svg(card, cardPath(card), { scale: CARD_SCALE * 100 });
     }
-
-    this.load.on('progress', this.updateLoadingBar, this);
   }
 
   create() {

@@ -7,9 +7,12 @@ defmodule GolfWeb.GameLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="game-page">
-      <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore">
+    <div id="game-page">
+      <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
+      <div id="game-info">
+        <h2>Game <%= @game_id %></h2>
       </div>
+      <div id="toggle-sidebar"></div>
     </div>
     """
   end
@@ -22,9 +25,7 @@ defmodule GolfWeb.GameLive do
       send(self(), {:load_game, game_id})
     end
 
-    {:ok,
-     socket
-     |> assign(page_title: "Game", user: user, game_id: game_id, game: nil)}
+    {:ok, assign(socket, page_title: "Game", user: user, game_id: game_id, game: nil)}
   end
 
   @impl true
