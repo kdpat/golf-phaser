@@ -89,10 +89,10 @@ defmodule Golf.Games do
 
   def current_round(_), do: nil
 
-  defguardp rounds_full(game) when length(game.rounds) >= length(game.players)
+  defguardp rounds_full(game) when length(game.rounds) > length(game.players)
 
   def current_state(%Game{rounds: [round | _]} = game)
-      when round.state == :over and rounds_full(game) do
+      when round.state == :round_over and rounds_full(game) do
     :game_over
   end
 

@@ -341,6 +341,7 @@ export class GolfScene extends Phaser.Scene {
     const player = game.players.find(p => p.id === event.player_id);
     if (!player) throw new Error("null player");
 
+    const oldState = this.golfGame.state;
     this.golfGame = game;
 
     switch (event.action) {
@@ -359,6 +360,12 @@ export class GolfScene extends Phaser.Scene {
       case "swap":
         this.onSwap(game, player, event);
         break;
+    }
+
+    if (game.userIsHost
+      && game.state === "round_over"
+      && oldState !== "round_over") {
+      this.createNextRoundButton();
     }
 
     this.updatePlayerTexts();
