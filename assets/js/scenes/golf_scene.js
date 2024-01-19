@@ -27,8 +27,8 @@ export class GolfScene extends Phaser.Scene {
 
   create() {
     this.setupCamera();
-    // this.setupMouseWheelZoom();
-    // this.setupMouseDragging();
+    this.setupMouseWheelZoom();
+    this.setupMouseDragging();
     this.setupKeyListeners();
     this.setupEventListeners();
     EMITTER.emit("golf_scene_ready");
@@ -84,7 +84,7 @@ export class GolfScene extends Phaser.Scene {
     this.dragStartX = 0;
     this.dragStartY = 0;
 
-    const dragSpeed = 0.75;
+    const dragSpeed = 1;
 
     this.input.on('pointerdown', pointer => {
       this.isDragging = true;
@@ -185,8 +185,9 @@ export class GolfScene extends Phaser.Scene {
   }
 
   addHeldCard(player) {
-    const isUsersCard = player.id === this.golfGame.playerId;
-    const cardName = isUsersCard ? player.held_card : DOWN_CARD;
+    const cardName = player.id === this.golfGame.playerId
+      ? player.held_card
+      : DOWN_CARD;
 
     const { x, y, rotation } = heldCardCoord(GAME_WIDTH, GAME_HEIGHT, player.position);
     const heldImg = this.addCard(cardName, x, y, rotation);
@@ -203,12 +204,13 @@ export class GolfScene extends Phaser.Scene {
     const color = playerColor(player);
 
     const textStyle = {
-      font: '50px monospace',
+      font: '28px monospace',
       fill: color,
+      align: "center",
     };
 
     const points = player.score == 1 || player.score == -1 ? "pt" : "pts";
-    const textStr = `${player.user.name}(${player.score}${points})`;
+    const textStr = `${player.user.name}\n(${player.score}${points})`;
     const textObj = this.add.text(0, 0, textStr, textStyle);
 
     const { x, y, originX, originY } = playerTextCoord(GAME_WIDTH, GAME_HEIGHT, player.position);
@@ -227,7 +229,7 @@ export class GolfScene extends Phaser.Scene {
 
   updatePlayerText(player) {
     const points = player.score == 1 || player.score == -1 ? "pt" : "pts";
-    const textStr = `${player.user.name}(${player.score}${points})`;
+    const textStr = `${player.user.name}\n(${player.score}${points})`;
     const textObj = this.playerTexts[player.position];
     textObj.setText(textStr);
 
@@ -601,10 +603,9 @@ export class GolfScene extends Phaser.Scene {
     const width = 300;
     const height = 100;
     const radius = 20;
-    const bgColor = 0x0000ff;
+    const bgColor = 0x0069d9;
     const textColor = '#ffffff';
     const bgX = GAME_WIDTH / 2 - width / 2;
-    // const bgY = GAME_HEIGHT * 0.85 - height / 2;
     const bgY = GAME_HEIGHT - width / 2 - CARD_HEIGHT / 2 - 4;
 
     this.startButton = {};
@@ -631,7 +632,7 @@ export class GolfScene extends Phaser.Scene {
     const width = 300;
     const height = 100;
     const radius = 20;
-    const bgColor = 0x0000ff;
+    const bgColor = 0x0069d9;
     const textColor = '#ffffff';
     const bgX = GAME_WIDTH / 2 - width / 2;
     const bgY = GAME_HEIGHT - width / 2 - CARD_HEIGHT / 2 - 4;

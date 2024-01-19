@@ -4,7 +4,7 @@ export const EMITTER = new Phaser.Events.EventEmitter();
 
 export const BG_COLOR = 0x228b22;
 
-export const GAME_WIDTH = 950;
+export const GAME_WIDTH = 1000;
 export const GAME_HEIGHT = 1200;
 
 export const CARD_SCALE = 0.5;

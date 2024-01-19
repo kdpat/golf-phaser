@@ -9,15 +9,15 @@ defmodule GolfWeb.LobbyLive do
 
       <div class="players">
         <h4>Players</h4>
-        <ol id="players-list" phx-update="stream">
+        <ul id="players-list" phx-update="stream">
           <li :for={{dom_id, user} <- @streams.users} id={dom_id}>
             <span><%= user.name %></span>
           </li>
-        </ol>
+        </ul>
       </div>
       <!--
       @game_exists? will be nil on mount, and true or false after the db is checked.
-      If it's nil we don't want to show it, so explicitly check for false.
+      If it's nil (the data isn't loaded yet) we don't want to show it, so explicitly check for false.
       -->
       <button :if={@host? && @game_exists? == false} phx-click="start_game">
         Start Game

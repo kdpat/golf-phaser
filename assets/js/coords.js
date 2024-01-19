@@ -25,22 +25,22 @@ export function heldCardCoord(width, height, pos, xPad = HAND_X_PAD, yPad = HAND
 
   switch (pos) {
     case "bottom":
-      x = width / 2 + CARD_WIDTH * 2.4;
+      x = width / 2 + CARD_WIDTH * 1.5 + xPad * 1.5;
       y = height - CARD_HEIGHT - yPad - 30;
       break;
 
     case "top":
-      x = width / 2 - CARD_WIDTH * 1.5;
-      y = CARD_HEIGHT + 1.3 * yPad + 30;
+      x = width / 2 - CARD_WIDTH * 1.5 - xPad;
+      y = CARD_HEIGHT + yPad * 1.5;
       break;
 
     case "left":
-      x = CARD_WIDTH + xPad * 2;
+      x = CARD_WIDTH + xPad + 4;
       y = height / 2 + CARD_HEIGHT * 1.5 + xPad + 2;
       break;
 
     case "right":
-      x = width - CARD_WIDTH - yPad - 5;
+      x = width - CARD_WIDTH - xPad - 4;
       y = height / 2 + CARD_HEIGHT * 1.5 + xPad;
       break;
 

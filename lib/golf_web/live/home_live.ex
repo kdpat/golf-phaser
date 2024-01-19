@@ -19,8 +19,8 @@ defmodule GolfWeb.HomeLive do
         <button>Join Game</button>
       </form>
 
-      <button phx-click="create_lobby">
-        Create Game
+      <button id="create-game-button" phx-click="create_lobby">
+        New Game
       </button>
     </div>
     """

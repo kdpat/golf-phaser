@@ -1,6 +1,5 @@
 import * as Phaser from "../../vendor/phaser.min.js";
-import { cardPath, CARD_NAMES, CARD_SCALE } from "../game.js";
-import { BG_COLOR } from "../game.js";
+import { cardPath, CARD_NAMES, CARD_SCALE, BG_COLOR } from "../game.js";
 
 export class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -49,10 +48,8 @@ export class LoadingScene extends Phaser.Scene {
 
   updateLoadingBar(progress) {
     const { centerX, centerY } = this.cameras.main;
-
     this.graphics.fillStyle(0x00ff00, 1);
     this.graphics.fillRect(centerX - this.progressBarWidth / 2, centerY + this.progressBarYOffset - this.progressBarHeight / 2, this.progressBarWidth * progress, this.progressBarHeight);
-
     this.loadingText.setText('Loading ' + parseInt(progress * 100) + '%');
   }
 }
