@@ -100,44 +100,33 @@ input[name="id"]:focus {
   display: flex;
   flex-direction: row;
   height: calc(100vh - 1.5rem);
+  background-color: lightblue;
 }
 
 #game-canvas {
-  /* width: 67vw; */
   margin: auto;
-  flex-grow: 1;
-  /* transition: width 0.3s ease; */
   height: 100%;
   overflow: hidden;
 }
 
 #game-info {
-  flex-shrink: 0;
-  width: 33vw;
+  flex-grow: 0;
+  flex-shrink: 1;
+  flex-basis: 33vw;
   text-align: center;
-  background-color: yellowgreen;
-  /* transition: all 0.3s ease; */
+  background-color: #f0f0f0;
+  color: #333;
+  transition: flex 0.3s ease;
 }
 
 #game-info.active {
-  width: 33vw;
+  flex-basis: 33vw;
 }
 
 #game-info:not(.active) {
-  width: 0;
+  flex-basis: 0;
   overflow: hidden;
 }
-
-/* #toggle-sidebar {
-  position: fixed;
-  right: 0;
-  top: 50%;
-  z-index: 1000;
-  background-color: #333;
-  color: white;
-  padding: 10px;
-  cursor: pointer;
-} */
 
 #toggle-sidebar {
   position: fixed;

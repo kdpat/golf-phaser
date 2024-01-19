@@ -6,11 +6,13 @@ import "../css/app.css"
 import { createPhaserGame } from "./phaser_game.js"
 import { EMITTER } from "./game.js"
 
+let phaserGame;
+
 const hooks = {};
 
 hooks.GameCanvas = {
   mounted() {
-    createPhaserGame(this.pushEvent.bind(this));
+    phaserGame = createPhaserGame(this.pushEvent.bind(this));
 
     this.handleEvent("game_loaded", data => {
       console.log("game loaded", data);
@@ -36,6 +38,16 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sidebar) {
     sidebar.addEventListener('click', () => {
       gameInfo.classList.toggle('active');
+
+      // if (phaserGame) {
+      //   const interval = setInterval(() => {
+      //     phaserGame.scale.refresh();
+      //   }, 10);
+
+      //   setTimeout(() => {
+      //     clearInterval(interval);
+      //   }, 1000);
+      // }
     });
   }
 });
