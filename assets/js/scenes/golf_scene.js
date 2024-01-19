@@ -259,17 +259,30 @@ export class GolfScene extends Phaser.Scene {
     if (game.userIsHost && game.state === "no_round") {
       this.createStartButton();
     }
+
+    if (game.userIsHost && game.state === "round_over") {
+      this.createNextRoundButton();
+    }
   }
 
   onRoundStart(game) {
     this.golfGame = game;
+
+    this.cards.table.forEach(img => img.destroy());
+    this.cards.table = [];
+
+    Object.values(this.cards.hands).forEach(hand => {
+      hand.forEach(cardImg => cardImg.destroy());
+    });
+
+    this.cards.deck.x = GAME_WIDTH / 2;
 
     if (this.startButton) {
       this.destroyStartGameButton();
     }
 
     const firstPlayerIndex = game.players.findIndex(p => p.id == game.firstPlayerId);
-    if (firstPlayerIndex == null) throw new Error("First player index is null.");
+    if (firstPlayerIndex == null) throw new Error("first player index is null");
 
     const players = rotate(game.players, firstPlayerIndex);
     const handsTweens = [];
@@ -366,11 +379,11 @@ export class GolfScene extends Phaser.Scene {
       }
     });
 
-    if (this.isPlayable("deck")) {
+    if (this.cards.deck && this.isPlayable("deck")) {
       makePlayable(this.cards.deck, () => this.pushCardClick("deck"));
     }
 
-    if (this.isPlayable("table") && this.cards.table[0]) {
+    if (this.cards.table[0] && this.isPlayable("table")) {
       makePlayable(this.cards.table[0], () => this.pushCardClick("table"));
     }
   }
@@ -584,7 +597,8 @@ export class GolfScene extends Phaser.Scene {
     const bgColor = 0x0000ff;
     const textColor = '#ffffff';
     const bgX = GAME_WIDTH / 2 - width / 2;
-    const bgY = GAME_HEIGHT * 0.85 - height / 2;
+    // const bgY = GAME_HEIGHT * 0.85 - height / 2;
+    const bgY = GAME_HEIGHT - width / 2 - CARD_HEIGHT / 2 - 4;
 
     this.startButton = {};
 
@@ -597,6 +611,35 @@ export class GolfScene extends Phaser.Scene {
     );
 
     this.startButton.text = this.add.text(GAME_WIDTH / 2, bgY + height / 2, 'Start Game', {
+      font: '48px monospace',
+      fill: textColor
+    }).setOrigin(0.5);
+
+    this.startButton.background.on('pointerdown', () => this.pushStartRound());
+    this.startButton.background.on('pointerover', () => this.input.setDefaultCursor('pointer'));
+    this.startButton.background.on('pointerout', () => this.input.setDefaultCursor('default'));
+  }
+
+  createNextRoundButton() {
+    const width = 300;
+    const height = 100;
+    const radius = 20;
+    const bgColor = 0x0000ff;
+    const textColor = '#ffffff';
+    const bgX = GAME_WIDTH / 2 - width / 2;
+    const bgY = GAME_HEIGHT - width / 2 - CARD_HEIGHT / 2 - 4;
+
+    this.startButton = {};
+
+    this.startButton.background = this.add.graphics({ x: bgX, y: bgY });
+    this.startButton.background.fillStyle(bgColor, 1);
+    this.startButton.background.fillRoundedRect(0, 0, width, height, radius);
+    this.startButton.background.setInteractive(
+      new Phaser.Geom.Rectangle(0, 0, width, height),
+      Phaser.Geom.Rectangle.Contains
+    );
+
+    this.startButton.text = this.add.text(GAME_WIDTH / 2, bgY + height / 2, 'Next Round', {
       font: '48px monospace',
       fill: textColor
     }).setOrigin(0.5);

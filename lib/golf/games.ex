@@ -186,6 +186,14 @@ defmodule Golf.Games do
     end
   end
 
+  def game_over?(game)
+      when length(game.rounds) == length(game.players) + 1 and
+             hd(game.rounds).state == :round_over do
+    true
+  end
+
+  def game_over?(_), do: false
+
   def playable_cards(%Game{rounds: [round | _]}, player) do
     playable_cards_round(round, player)
   end
