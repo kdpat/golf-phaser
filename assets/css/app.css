@@ -168,6 +168,22 @@ ul.round-scores li ul li {
   font-size: 1rem;
 }
 
+.player-score.turn-1 > .player-name {
+  color: #9c27b0;
+}
+
+.player-score.turn-2 > .player-name {
+  color: #009688;
+}
+
+.player-score.turn-3 > .player-name {
+  color: #ff9800;
+}
+
+.player-score.turn-4 > .player-name {
+  color: #8bc34a;
+}
+
 #toggle-sidebar {
   position: fixed;
   right: 0;
