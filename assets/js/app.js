@@ -12,11 +12,8 @@ const hooks = {};
 
 hooks.GameCanvas = {
   mounted() {
-    phaserGame = createPhaserGame(this.pushEvent.bind(this));
-
     this.handleEvent("game_loaded", data => {
-      console.log("game loaded", data);
-      EMITTER.once("golf_scene_ready", () => EMITTER.emit("game_loaded", data.game));
+      phaserGame = createPhaserGame(data.game, this.pushEvent.bind(this));
     });
 
     this.handleEvent("round_started", data => {
@@ -38,16 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sidebar) {
     sidebar.addEventListener('click', () => {
       gameInfo.classList.toggle('active');
-
-      // if (phaserGame) {
-      //   const interval = setInterval(() => {
-      //     phaserGame.scale.refresh();
-      //   }, 10);
-
-      //   setTimeout(() => {
-      //     clearInterval(interval);
-      //   }, 1000);
-      // }
     });
   }
 });
@@ -69,7 +56,7 @@ window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 liveSocket.connect()
 
 // expose liveSocket on window for web console debug logs and latency simulation:
-// >> liveSocket.enableDebug()
-// >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
-// >> liveSocket.disableLatencySim()
+// liveSocket.enableDebug()
+// liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
+// liveSocket.disableLatencySim()
 window.liveSocket = liveSocket

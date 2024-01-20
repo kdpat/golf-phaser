@@ -9,7 +9,7 @@ defmodule GolfWeb.GameLive do
     ~H"""
     <div id="game-page">
       <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
-      <div id="game-info" class="active">
+      <div id="game-info" class={@game_info_class}>
         <h2>Game <%= @game_id %></h2>
         <ul class="round-scores">
           <%= for {round, i} <- @scores |> Enum.reverse() |> Enum.with_index() do %>
@@ -22,7 +22,7 @@ defmodule GolfWeb.GameLive do
           <% end %>
         </ul>
       </div>
-      <div id="toggle-sidebar"></div>
+      <div id="toggle-sidebar" phx-click="toggle_sidebar"></div>
     </div>
     """
   end
@@ -43,7 +43,15 @@ defmodule GolfWeb.GameLive do
       send(self(), {:load_game, game_id})
     end
 
-    {:ok, assign(socket, page_title: "Game", user: user, game_id: game_id, game: nil, scores: [])}
+    {:ok,
+     assign(socket,
+       page_title: "Game",
+       game_info_class: "active",
+       user: user,
+       game_id: game_id,
+       game: nil,
+       scores: []
+     )}
   end
 
   @impl true
@@ -85,6 +93,18 @@ defmodule GolfWeb.GameLive do
     {:noreply,
      assign(socket, game: game, scores: scores)
      |> push_event("game_event", %{"game" => data, "event" => event})}
+  end
+
+  @impl true
+  def handle_event("toggle_sidebar", _params, socket) do
+    class =
+      if socket.assigns.game_info_class == "" do
+        "active"
+      else
+        ""
+      end
+
+    {:noreply, assign(socket, game_info_class: class)}
   end
 
   @impl true

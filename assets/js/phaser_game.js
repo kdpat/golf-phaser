@@ -27,9 +27,9 @@ const config = {
   resolution: 2,
 };
 
-export function createPhaserGame(pushEvent) {
+export function createPhaserGame(golfGame, pushEvent) {
   const game = new Phaser.Game(config);
-  game.scene.start("LoadingScene", { pushEvent });
+  game.scene.start("LoadingScene", { golfGame, pushEvent });
 }
 
 // const WIDTH_THRESHOLD = 600;

@@ -22,6 +22,7 @@ export class GolfScene extends Phaser.Scene {
   }
 
   init(data) {
+    this.golfGame = data.golfGame;
     this.pushEvent = data.pushEvent;
   }
 
@@ -31,7 +32,7 @@ export class GolfScene extends Phaser.Scene {
     this.setupMouseDragging();
     this.setupKeyListeners();
     this.setupEventListeners();
-    EMITTER.emit("golf_scene_ready");
+    this.onGameLoad(this.golfGame);
   }
 
   update() {

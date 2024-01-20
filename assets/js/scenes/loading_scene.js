@@ -7,6 +7,7 @@ export class LoadingScene extends Phaser.Scene {
   }
 
   init(data) {
+    this.golfGame = data.golfGame;
     this.pushEvent = data.pushEvent;
   }
 
@@ -21,7 +22,7 @@ export class LoadingScene extends Phaser.Scene {
   }
 
   create() {
-    this.scene.start("GolfScene", { pushEvent: this.pushEvent });
+    this.scene.start("GolfScene", { golfGame: this.golfGame, pushEvent: this.pushEvent });
   }
 
   setupLoadingBar() {
