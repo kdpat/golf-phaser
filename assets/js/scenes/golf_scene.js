@@ -9,13 +9,15 @@ export class GolfScene extends Phaser.Scene {
     super({ key: "GolfScene" });
 
     this.cards = {
-      table: [],
       hands: {
         bottom: [],
         left: [],
         top: [],
         right: [],
       },
+      table: [],
+      deck: null,
+      held: null,
     };
 
     this.playerTexts = {};

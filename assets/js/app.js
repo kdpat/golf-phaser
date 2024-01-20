@@ -13,6 +13,7 @@ const hooks = {};
 hooks.GameCanvas = {
   mounted() {
     this.handleEvent("game_loaded", data => {
+      console.log("game loaded", data.game);
       phaserGame = createPhaserGame(data.game, this.pushEvent.bind(this));
     });
 
@@ -38,15 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
-// window.addEventListener('resize', () => {
-//   if (window.innerWidth < 600) {
-//     const roundScores = document.querySelector('ul.round-scores');
-//     if (roundScores) {
-//       roundScores.scrollTop = 0;
-//     }
-//   }
-// });
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 

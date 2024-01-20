@@ -371,16 +371,19 @@ defmodule Golf.Games do
   end
 
   # if there's no round, give each player a score of 0
-  def username_scores(%Game{rounds: []} = game) do
+  def info_scores(%Game{rounds: []} = game) do
     game.players
     |> Enum.map(fn p -> {p.user.name, 0} end)
     |> Enum.into(%{})
     |> List.wrap()
   end
 
-  def username_scores(%Game{} = game) do
+  def info_scores(%Game{} = game) do
     scores(game)
     |> Enum.map(&put_score_usernames(&1, game.players))
+    |> Enum.map(fn scores ->
+      Enum.sort(scores, fn {_, score1}, {_, score2} -> score1 < score2 end)
+    end)
   end
 
   defp put_score_usernames(round_scores, players) do

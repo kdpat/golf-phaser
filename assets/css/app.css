@@ -108,16 +108,14 @@ input[name="id"]:focus {
   height: 100%;
   overflow: hidden;
   flex-grow: 1;
-  /* flex-basis: 67vw; */
 }
 
 #game-info {
   flex-shrink: 0;
   flex-basis: 40vw;
   text-align: center;
-  /* background-color: #f0f0f0; */
   color: #333;
-  /* transition: all 0.3s ease; */
+  transition: all 0.3s ease;
 }
 
 #game-info.active {
@@ -211,21 +209,21 @@ ul.round-scores li ul li {
 
   #game-canvas {
     flex-grow: 1;
-    /* flex-shrink: 0; */
   }
 
   #game-info {
     flex-basis: 20vh;
-    /* overflow: scroll; */
   }
 
   #game-info.active {
     flex-basis: 20vh;
+    opacity: 1;
   }
 
   #game-info:not(.active) {
     flex-basis: 0;
     overflow: hidden;
+    opacity: 0;
   }
 
   ul.round-scores {
