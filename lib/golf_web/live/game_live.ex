@@ -54,9 +54,9 @@ defmodule GolfWeb.GameLive do
     {:ok,
      assign(socket,
        page_title: "Game",
-       game_info_class: "active",
        user: user,
        game_id: game_id,
+       game_info_class: "active",
        game: nil,
        scores: []
      )}

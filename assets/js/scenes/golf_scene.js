@@ -605,7 +605,7 @@ export class GolfScene extends Phaser.Scene {
   createStartButton() {
     const width = 300;
     const height = 100;
-    const radius = 20;
+    const radius = 10;
     const bgColor = 0x0069d9;
     const textColor = '#ffffff';
     const bgX = GAME_WIDTH / 2 - width / 2;
@@ -627,14 +627,26 @@ export class GolfScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     this.startButton.background.on('pointerdown', () => this.pushStartRound());
-    this.startButton.background.on('pointerover', () => this.input.setDefaultCursor('pointer'));
-    this.startButton.background.on('pointerout', () => this.input.setDefaultCursor('default'));
+
+    this.startButton.background.on('pointerover', () => {
+      this.input.setDefaultCursor('pointer');
+      this.startButton.background.clear();
+      this.startButton.background.fillStyle(0x005cbf, 1);
+      this.startButton.background.fillRoundedRect(0, 0, width, height, radius);
+    });
+
+    this.startButton.background.on('pointerout', () => {
+      this.input.setDefaultCursor('default');
+      this.startButton.background.clear();
+      this.startButton.background.fillStyle(bgColor, 1);
+      this.startButton.background.fillRoundedRect(0, 0, width, height, radius);
+    });
   }
 
   createNextRoundButton() {
     const width = 300;
     const height = 100;
-    const radius = 20;
+    const radius = 10;
     const bgColor = 0x0069d9;
     const textColor = '#ffffff';
     const bgX = GAME_WIDTH / 2 - width / 2;
@@ -656,8 +668,20 @@ export class GolfScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     this.startButton.background.on('pointerdown', () => this.pushStartRound());
-    this.startButton.background.on('pointerover', () => this.input.setDefaultCursor('pointer'));
-    this.startButton.background.on('pointerout', () => this.input.setDefaultCursor('default'));
+
+    this.startButton.background.on('pointerover', () => {
+      this.input.setDefaultCursor('pointer');
+      this.startButton.background.clear();
+      this.startButton.background.fillStyle(0x005cbf, 1);
+      this.startButton.background.fillRoundedRect(0, 0, width, height, radius);
+    });
+
+    this.startButton.background.on('pointerout', () => {
+      this.input.setDefaultCursor('default');
+      this.startButton.background.clear();
+      this.startButton.background.fillStyle(bgColor, 1);
+      this.startButton.background.fillRoundedRect(0, 0, width, height, radius);
+    });    
   }
 
   destroyStartGameButton() {
