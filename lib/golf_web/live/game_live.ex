@@ -26,6 +26,7 @@ defmodule GolfWeb.GameLive do
             </li>
           <% end %>
         </ul>
+        <button id="reset-camera">Reset Camera</button>
       </div>
       <div id="toggle-sidebar" phx-click="toggle_sidebar"></div>
     </div>
@@ -74,7 +75,6 @@ defmodule GolfWeb.GameLive do
         Golf.subscribe!(topic(game.id))
         data = GameData.new(game, socket.assigns.user)
         scores = Games.info_scores(game)
-        dbg(game.players)
 
         {:noreply,
          socket

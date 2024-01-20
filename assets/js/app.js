@@ -30,12 +30,27 @@ hooks.GameCanvas = {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // setup toggle sidebar
   const sidebar = document.getElementById('toggle-sidebar');
   const gameInfo = document.getElementById('game-info');
 
   if (sidebar) {
     sidebar.addEventListener('click', () => {
       gameInfo.classList.toggle('active');
+    });
+  }
+
+  //setup reset camera button
+  const resetCameraButton = document.getElementById('reset-camera');
+
+  if (resetCameraButton) {
+    resetCameraButton.addEventListener('click', () => {
+      if (phaserGame && phaserGame.scene && phaserGame.scene.isActive('GolfScene')) {
+        const golfScene = phaserGame.scene.getScene('GolfScene');
+        if (golfScene) {
+          golfScene.resetCamera();
+        }
+      }
     });
   }
 });
