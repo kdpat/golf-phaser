@@ -370,6 +370,29 @@ defmodule Golf.Games do
     }
   end
 
+  # if there's no round, give each player a score of 0
+  def scores(%Game{rounds: []} = game) do
+    game.players
+    |> Enum.map(fn p -> {p.id, 0} end)
+    |> Enum.into(%{})
+  end
+
+  def scores(%Game{rounds: [%Round{} = round | _]} = game) do
+    player_ids = Enum.map(game.players, & &1.id)
+    player_scores(round.hands, player_ids)
+  end
+
+  def player_scores(hands, player_ids) do
+    player_ids
+    |> Enum.map(fn pid -> {pid, player_score(hands, pid)} end)
+    |> Enum.into(%{})
+  end
+
+  def player_score(hands, player_id) do
+    hand = get_hand(hands, player_id)
+    score(hand)
+  end
+
   def score(hand) do
     hand
     |> Enum.map(&rank_if_face_up/1)

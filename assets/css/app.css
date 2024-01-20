@@ -100,27 +100,28 @@ input[name="id"]:focus {
   display: flex;
   flex-direction: row;
   height: calc(100vh - 1.5rem);
-  background-color: lightblue;
+  /* background-color: lightblue; */
+  background-color: #f0f0f0;
 }
 
 #game-canvas {
-  margin: auto;
   height: 100%;
   overflow: hidden;
+  flex-grow: 1;
+  /* flex-basis: 67vw; */
 }
 
 #game-info {
-  flex-grow: 0;
-  flex-shrink: 1;
-  flex-basis: 33vw;
+  flex-shrink: 0;
+  flex-basis: 40vw;
   text-align: center;
-  background-color: #f0f0f0;
+  /* background-color: #f0f0f0; */
   color: #333;
-  transition: flex 0.3s ease;
+  /* transition: flex 0.3s ease; */
 }
 
 #game-info.active {
-  flex-basis: 33vw;
+  flex-basis: 40vw;
 }
 
 #game-info:not(.active) {
@@ -160,4 +161,27 @@ input[name="id"]:focus {
 #toggle-sidebar::before {
   content: '☰';
   line-height: 1;
+}
+
+@media screen and (max-width: 600px) {
+  #game-page {
+    flex-direction: column; /* Stack elements vertically */
+  }
+
+  #game-canvas {
+    flex-grow: 1;
+  }
+
+  #game-info {
+    flex-basis: 25vh;
+  }
+
+  #game-info.active {
+    flex-basis: 25vh;
+  }
+
+  #game-info:not(.active) {
+    flex-basis: 0;
+    overflow: hidden;
+  }
 }

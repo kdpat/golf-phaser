@@ -5,6 +5,8 @@ import { GAME_WIDTH, GAME_HEIGHT } from "./game.js";
 
 const PARENT_ID = "game-canvas";
 const SCALE_MODE = Phaser.Scale.HEIGHT_CONTROLS_WIDTH;
+// const SCALE_MODE = Phaser.Scale.RESIZE_Y;
+// const SCALE_MODE = Phaser.Scale.FIT;
 
 const config = {
   type: Phaser.WEBGL,
@@ -16,7 +18,7 @@ const config = {
   scale: {
     parent: PARENT_ID,
     mode: SCALE_MODE,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
+    autoCenter: Phaser.Scale.CENTER_X,
     // autoCenter: Phaser.Scale.CENTER_Y,
   },
   render: {
