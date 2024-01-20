@@ -55,6 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// clear chat after submit
+window.addEventListener("phx:clear-chat-input", _ => {
+  const inputEl = document.querySelector("#chat-form-input");
+  inputEl.value = "";
+});
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
 let liveSocket = new LiveSocket(

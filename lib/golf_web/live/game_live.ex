@@ -26,6 +26,7 @@ defmodule GolfWeb.GameLive do
             </li>
           <% end %>
         </ul>
+        <.chat messages={@streams.chat_messages} submit="submit_chat" />
         <button id="reset-camera">Reset Camera</button>
       </div>
       <div id="toggle-sidebar" phx-click="toggle_sidebar"></div>
@@ -43,12 +44,58 @@ defmodule GolfWeb.GameLive do
     """
   end
 
+  def chat(assigns) do
+    ~H"""
+    <div>
+      <.chat_messages messages={@messages} />
+      <.chat_form submit={@submit} />
+    </div>
+    """
+  end
+
+  def chat_messages(assigns) do
+    ~H"""
+    <div>
+      <h4>Messages</h4>
+      <ul id="chat-messages" phx-update="stream">
+        <.chat_message :for={{id, msg} <- @messages} id={id} msg={msg} />
+      </ul>
+    </div>
+    """
+  end
+
+  defp chat_message(assigns) do
+    ~H"""
+    <li id={@id}>
+      <span><%= @msg.inserted_at %></span>
+      <span><%= @msg.user.name %></span>:
+      <p><%= @msg.text %></p>
+    </li>
+    """
+  end
+
+  def chat_form(assigns) do
+    ~H"""
+    <form phx-submit={@submit}>
+      <.input
+        id="chat-form-input"
+        name="text"
+        value=""
+        placeholder="Type chat message here..."
+        required
+      />
+      <.button>Submit</.button>
+    </form>
+    """
+  end
+
   @impl true
   def mount(%{"id" => game_id}, session, socket) do
     user = Golf.Users.get_user_by_session_id(session["session_id"])
 
     if connected?(socket) do
       send(self(), {:load_game, game_id})
+      send(self(), {:load_chat_messages, game_id})
     end
 
     {:ok,
@@ -59,7 +106,8 @@ defmodule GolfWeb.GameLive do
        game_info_class: "active",
        game: nil,
        scores: []
-     )}
+     )
+     |> stream(:chat_messages, [])}
   end
 
   @impl true
@@ -84,6 +132,13 @@ defmodule GolfWeb.GameLive do
   end
 
   @impl true
+  def handle_info({:load_chat_messages, id}, socket) do
+    messages = Golf.Chat.get_messages(id)
+    Golf.subscribe!("chat:#{id}")
+    {:noreply, stream(socket, :chat_messages, messages, at: 0)}
+  end
+
+  @impl true
   def handle_info({:round_started, game}, socket) do
     data = GameData.new(game, socket.assigns.user)
 
@@ -104,6 +159,11 @@ defmodule GolfWeb.GameLive do
   end
 
   @impl true
+  def handle_info({:new_chat_message, message}, socket) do
+    {:noreply, stream_insert(socket, :chat_messages, message, at: 0)}
+  end
+
+  @impl true
   def handle_event("toggle_sidebar", _params, socket) do
     class =
       if socket.assigns.game_info_class == "" do
@@ -113,6 +173,19 @@ defmodule GolfWeb.GameLive do
       end
 
     {:noreply, assign(socket, game_info_class: class)}
+  end
+
+  @impl true
+  def handle_event("submit_chat", %{"text" => text}, socket) do
+    id = socket.assigns.game_id
+
+    message =
+      Golf.Chat.ChatMessage.new(id, socket.assigns.user, text)
+      |> Golf.Chat.insert_message!()
+      |> Map.update!(:inserted_at, &Golf.Chat.format_chat_time/1)
+
+    Golf.broadcast!("chat:#{id}", {:new_chat_message, message})
+    {:noreply, push_event(socket, "clear-chat-input", %{})}
   end
 
   @impl true
