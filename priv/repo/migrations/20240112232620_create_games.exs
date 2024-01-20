@@ -20,7 +20,7 @@ defmodule Golf.Repo.Migrations.CreateGames do
 
     create table(:rounds) do
       add :game_id, references(:games, type: :string)
-      add :first_player_out_id, references(:players)
+      add :first_player_flipped_id, references(:players)
       add :state, :string
       add :turn, :integer
       add :deck, {:array, :string}

@@ -18,7 +18,8 @@ defmodule Golf.Games.GameData do
     :playerId,
     :userIsHost,
     :playableCards,
-    :isFlipped
+    :isFlipped,
+    # :scores
   ]
 
   def new(game, user) do
@@ -42,8 +43,8 @@ defmodule Golf.Games.GameData do
         []
       end
 
-    first_player = round && Enum.find(game.players, fn p -> p.turn == round.first_player_index end)
-    first_player_id = first_player && first_player.id
+    first_player =
+      round && Enum.find(game.players, fn p -> p.turn == round.first_player_index end)
 
     %__MODULE__{
       id: game.id,
@@ -53,11 +54,12 @@ defmodule Golf.Games.GameData do
       deck: round && round.deck,
       tableCards: round && round.table_cards,
       players: players,
-      firstPlayerId: first_player_id,
+      firstPlayerId: first_player && first_player.id,
       playerId: player && player.id,
       userIsHost: user.id == game.host_id,
       playableCards: playable_cards,
-      isFlipped: round && is_integer(round.first_player_out_id)
+      isFlipped: round && is_integer(round.first_player_flipped_id),
+      # scores: username_scores(game)
     }
   end
 

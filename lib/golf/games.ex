@@ -248,19 +248,19 @@ defmodule Golf.Games do
     update_fn = &flip_card_at(&1, event.hand_index)
     {hands, hand} = update_hand(round.hands, event.player_id, update_fn)
 
-    {state, turn, first_player_out_id} =
+    {state, turn, first_player_flipped_id} =
       cond do
         Enum.all?(Map.values(hands), &all_face_up?/1) ->
-          {:round_over, round.turn, round.first_player_out_id}
+          {:round_over, round.turn, round.first_player_flipped_id}
 
         all_face_up?(hand) ->
-          {:take, round.turn + 1, round.first_player_out_id || event.player_id}
+          {:take, round.turn + 1, round.first_player_flipped_id || event.player_id}
 
         true ->
-          {:take, round.turn + 1, round.first_player_out_id}
+          {:take, round.turn + 1, round.first_player_flipped_id}
       end
 
-    %{state: state, turn: turn, hands: hands, first_player_out_id: first_player_out_id}
+    %{state: state, turn: turn, hands: hands, first_player_flipped_id: first_player_flipped_id}
   end
 
   def round_changes(%Round{state: :take} = round, %Event{action: :take_deck} = event) do
@@ -287,7 +287,7 @@ defmodule Golf.Games do
         %Round{state: :hold} = round,
         %Event{action: :discard} = event
       )
-      when is_integer(round.first_player_out_id) do
+      when is_integer(round.first_player_flipped_id) do
     held_card = round.held_card["name"]
     table_cards = [held_card | round.table_cards]
     {hands, _} = update_hand(round.hands, event.player_id, &flip_all/1)
@@ -312,7 +312,7 @@ defmodule Golf.Games do
         %Round{state: :hold} = round,
         %Event{action: :discard} = event
       )
-      when is_nil(round.first_player_out_id) do
+      when is_nil(round.first_player_flipped_id) do
     hand = get_hand(round.hands, event.player_id)
 
     {state, turn} =
@@ -337,7 +337,7 @@ defmodule Golf.Games do
         %Round{state: :hold} = round,
         %Event{action: :swap} = event
       ) do
-    player_out? = is_integer(round.first_player_out_id)
+    player_out? = is_integer(round.first_player_flipped_id)
 
     {hand, card} =
       round.hands
@@ -348,16 +348,16 @@ defmodule Golf.Games do
     hands = put_hand(round.hands, event.player_id, hand)
     table_cards = [card | round.table_cards]
 
-    {state, turn, first_player_out_id} =
+    {state, turn, first_player_flipped_id} =
       cond do
         Enum.all?(Map.values(hands), &all_face_up?/1) ->
-          {:round_over, round.turn, round.first_player_out_id || event.player_id}
+          {:round_over, round.turn, round.first_player_flipped_id || event.player_id}
 
         all_face_up?(hand) ->
-          {:take, round.turn + 1, round.first_player_out_id || event.player_id}
+          {:take, round.turn + 1, round.first_player_flipped_id || event.player_id}
 
         true ->
-          {:take, round.turn + 1, round.first_player_out_id}
+          {:take, round.turn + 1, round.first_player_flipped_id}
       end
 
     %{
@@ -366,25 +366,41 @@ defmodule Golf.Games do
       held_card: nil,
       hands: hands,
       table_cards: table_cards,
-      first_player_out_id: first_player_out_id
+      first_player_flipped_id: first_player_flipped_id
     }
   end
 
-  # if there's no round, give each player a score of 0
-  def scores(%Game{rounds: []} = game) do
-    game.players
-    |> Enum.map(fn p -> {p.id, 0} end)
-    |> Enum.into(%{})
+  def username_scores(%Game{} = game) do
+    scores(game)
+    |> Enum.map(fn round_scores ->
+      Enum.map(round_scores, fn {id, score} ->
+        username = get_username(game.players, id)
+        {username, score}
+      end)
+      |> Enum.into(%{})
+    end)
   end
 
-  def scores(%Game{rounds: [%Round{} = round | _]} = game) do
+  def username_scores(players, %Round{} = round) do
+    player_ids = Enum.map(players, & &1.id)
+    round_scores(round, player_ids)
+  end
+
+  def get_username(players, player_id) do
+    players
+    |> Enum.find(&(&1.id == player_id))
+    |> Map.get(:user)
+    |> Map.get(:name)
+  end
+
+  def scores(game) do
     player_ids = Enum.map(game.players, & &1.id)
-    player_scores(round.hands, player_ids)
+    Enum.map(game.rounds, &round_scores(&1, player_ids))
   end
 
-  def player_scores(hands, player_ids) do
+  def round_scores(round, player_ids) do
     player_ids
-    |> Enum.map(fn pid -> {pid, player_score(hands, pid)} end)
+    |> Enum.map(fn pid -> {pid, player_score(round.hands, pid)} end)
     |> Enum.into(%{})
   end
 

@@ -14,7 +14,8 @@ defmodule Golf.Games.Round do
     field :first_player_index, :integer
 
     belongs_to :game, Golf.Games.Game, type: :string
-    belongs_to :first_player_out, Golf.Games.Player
+    belongs_to :first_player_flipped, Golf.Games.Player
+
     has_many :events, Golf.Games.Event
 
     timestamps(type: :utc_datetime)
@@ -31,7 +32,7 @@ defmodule Golf.Games.Round do
       :hands,
       :held_card,
       :first_player_index,
-      :first_player_out_id
+      :first_player_flipped_id
     ])
     |> validate_required([:state, :turn, :deck, :table_cards, :hands, :first_player_index])
   end

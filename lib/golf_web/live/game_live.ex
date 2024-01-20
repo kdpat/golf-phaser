@@ -9,11 +9,29 @@ defmodule GolfWeb.GameLive do
     ~H"""
     <div id="game-page">
       <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
-      <div id="game-info">
+      <div id="game-info" class="active">
         <h2>Game <%= @game_id %></h2>
+        <ul class="round-scores">
+          <%= for {round, i} <- @scores |> Enum.reverse() |> Enum.with_index() do %>
+            <li>
+              <h4>Round <%= i + 1 %></h4>
+              <ul>
+                <.player_score :for={{name, score} <- round} name={name} score={score} />
+              </ul>
+            </li>
+          <% end %>
+        </ul>
       </div>
       <div id="toggle-sidebar"></div>
     </div>
+    """
+  end
+
+  def player_score(assigns) do
+    ~H"""
+    <li>
+      <p><%= @name %>: <%= @score %></p>
+    </li>
     """
   end
 
@@ -25,7 +43,7 @@ defmodule GolfWeb.GameLive do
       send(self(), {:load_game, game_id})
     end
 
-    {:ok, assign(socket, page_title: "Game", user: user, game_id: game_id, game: nil)}
+    {:ok, assign(socket, page_title: "Game", user: user, game_id: game_id, game: nil, scores: [])}
   end
 
   @impl true
@@ -40,10 +58,11 @@ defmodule GolfWeb.GameLive do
       game ->
         Golf.subscribe!(topic(game.id))
         data = GameData.new(game, socket.assigns.user)
+        scores = Games.username_scores(game)
 
         {:noreply,
          socket
-         |> assign(game: game)
+         |> assign(game: game, scores: scores)
          |> push_event("game_loaded", %{"game" => data})}
     end
   end
@@ -61,9 +80,10 @@ defmodule GolfWeb.GameLive do
   @impl true
   def handle_info({:game_event, game, event}, socket) do
     data = GameData.new(game, socket.assigns.user)
+    scores = Games.username_scores(game)
 
     {:noreply,
-     assign(socket, game: game)
+     assign(socket, game: game, scores: scores)
      |> push_event("game_event", %{"game" => data, "event" => event})}
   end
 
