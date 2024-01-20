@@ -370,20 +370,26 @@ defmodule Golf.Games do
     }
   end
 
-  def username_scores(%Game{} = game) do
-    scores(game)
-    |> Enum.map(fn round_scores ->
-      Enum.map(round_scores, fn {id, score} ->
-        username = get_username(game.players, id)
-        {username, score}
-      end)
-      |> Enum.into(%{})
-    end)
+  # if there's no round, give each player a score of 0
+  def username_scores(%Game{rounds: []} = game) do
+    game.players
+    |> Enum.map(fn p -> {p.user.name, 0} end)
+    |> Enum.into(%{})
+    |> List.wrap()
   end
 
-  def username_scores(players, %Round{} = round) do
-    player_ids = Enum.map(players, & &1.id)
-    round_scores(round, player_ids)
+  def username_scores(%Game{} = game) do
+    scores(game)
+    |> Enum.map(&put_score_usernames(&1, game.players))
+  end
+
+  defp put_score_usernames(round_scores, players) do
+    round_scores
+    |> Enum.map(fn {id, score} ->
+      username = get_username(players, id)
+      {username, score}
+    end)
+    |> Enum.into(%{})
   end
 
   def get_username(players, player_id) do

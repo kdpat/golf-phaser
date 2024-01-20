@@ -39,6 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// window.addEventListener('resize', () => {
+//   if (window.innerWidth < 600) {
+//     const roundScores = document.querySelector('ul.round-scores');
+//     if (roundScores) {
+//       roundScores.scrollTop = 0;
+//     }
+//   }
+// });
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
 let liveSocket = new LiveSocket(

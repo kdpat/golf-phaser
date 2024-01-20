@@ -12,7 +12,7 @@ defmodule GolfWeb.GameLive do
       <div id="game-info" class={@game_info_class}>
         <h2>Game <%= @game_id %></h2>
         <ul class="round-scores">
-          <%= for {round, i} <- @scores |> Enum.reverse() |> Enum.with_index() do %>
+          <%= for {round, i} <- @scores |> Enum.with_index() |> Enum.reverse() do %>
             <li>
               <h4>Round <%= i + 1 %></h4>
               <ul>
@@ -78,10 +78,11 @@ defmodule GolfWeb.GameLive do
   @impl true
   def handle_info({:round_started, game}, socket) do
     data = GameData.new(game, socket.assigns.user)
+    scores = Games.username_scores(game)
 
     {:noreply,
      socket
-     |> assign(game: game)
+     |> assign(game: game, scores: scores)
      |> push_event("round_started", %{"game" => data})}
   end
 
