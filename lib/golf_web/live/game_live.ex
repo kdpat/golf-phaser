@@ -10,7 +10,7 @@ defmodule GolfWeb.GameLive do
     <div id="game-page">
       <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
       <div id="game-info" class={@game_info_class}>
-        <h2>Game <%= @game_id %></h2>
+        <h2 class="game-title">Game <%= @game_id %></h2>
         <ul class="round-scores">
           <%= for {round_scores, i} <- @scores |> Enum.reverse() |> Enum.with_index() |> Enum.reverse() do %>
             <li>
@@ -65,7 +65,7 @@ defmodule GolfWeb.GameLive do
     ~H"""
     <li id={@id} class="chat-message">
       <span class="timestamp"><%= @msg.inserted_at %></span>
-      <span class="username"><%= @msg.user.name %>:</span>
+      <span class="username turn-1"><%= @msg.user.name %>:</span>
       <span class="text"><%= @msg.text %></span>
     </li>
     """
@@ -138,10 +138,11 @@ defmodule GolfWeb.GameLive do
   @impl true
   def handle_info({:round_started, game}, socket) do
     data = GameData.new(game, socket.assigns.user)
+    scores = Games.info_scores(game)
 
     {:noreply,
      socket
-     |> assign(game: game)
+     |> assign(game: game, scores: scores)
      |> push_event("round_started", %{"game" => data})}
   end
 

@@ -32,25 +32,25 @@ export class GolfScene extends Phaser.Scene {
     this.setupCamera();
     this.setupMouseWheelZoom();
     this.setupMouseDragging();
-    this.setupKeyListeners();
+    // this.setupKeyListeners();
     this.setupEventListeners();
     this.onGameLoad(this.golfGame);
   }
 
-  update() {
-    if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
-      this.resetCamera();
-    }
-  }
+  // update() {
+  //   if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
+  //     this.resetCamera();
+  //   }
+  // }
 
   resetCamera() {
     this.camera.setZoom(1);
     this.camera.centerOn(GAME_WIDTH / 2, GAME_HEIGHT / 2);
   }
 
-  setupKeyListeners() {
-    this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-  }
+  // setupKeyListeners() {
+  //   this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+  // }
 
   setupEventListeners() {
     EMITTER.on("game_loaded", this.onGameLoad, this);

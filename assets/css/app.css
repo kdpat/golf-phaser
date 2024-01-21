@@ -84,7 +84,6 @@ input[name="id"]:focus {
 #home-page {
   display: flex;
   flex-direction: column;
-  height: 100%;
   justify-content: space-between;
   height: calc(100vh - 1.5rem);
 }
@@ -99,6 +98,23 @@ p.user {
 
 #players-list li {
   list-style-type: none;
+}
+
+#lobby-page {
+  display: flex;
+  flex-direction: column;
+}
+
+#lobby-page > ul {
+  margin: 2rem auto;
+}
+
+#lobby-page .players {
+  margin: 2rem auto;
+}
+
+#lobby-page > button {
+  margin: auto;
 }
 
 #game-page {
@@ -116,7 +132,7 @@ p.user {
 
 #game-info {
   flex-shrink: 0;
-  flex-basis: 40vw;
+  flex-basis: 33vw;
   text-align: center;
   color: #333;
   transition: all 0.3s ease;
@@ -126,7 +142,7 @@ p.user {
 }
 
 #game-info.active {
-  flex-basis: 40vw;
+  flex-basis: 33vw;
 }
 
 #game-info:not(.active) {
@@ -141,6 +157,10 @@ ul.round-scores {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
+  margin: 0 auto;
+  padding: 0 50px;
+  max-height: 33vh;
+  /* min-height: 80px; */
 }
 
 ul.round-scores li {
@@ -218,6 +238,7 @@ button#reset-camera {
 
 #chat-messages {
   overflow-y: auto;
+  max-height: 50vh;
 }
 
 .chat-message {
@@ -235,6 +256,27 @@ button#reset-camera {
   font-size: 0.6rem;
 }
 
+.username.turn-1 {
+  color: #9c27b0;
+}
+
+/* .player-score.turn-2 > .player-name {
+  color: #009688;
+}
+
+.player-score.turn-3 > .player-name {
+  color: #ff9800;
+}
+
+.player-score.turn-4 > .player-name {
+  color: #8bc34a;
+} */
+
+#chat-form {
+  display: flex;
+  justify-content: center;
+}
+
 #chat-form-input {
   text-align: center;
 }
@@ -249,25 +291,39 @@ button#reset-camera {
   }
 
   #game-info {
-    flex-basis: 20vh;
+    height: 40vh;
   }
 
   #game-info.active {
-    flex-basis: 20vh;
     opacity: 1;
   }
 
   #game-info:not(.active) {
-    flex-basis: 0;
     overflow: hidden;
     opacity: 0;
   }
 
-  /* ul.round-scores {
-    max-height: 20vh;
+  .game-title {
+    display: none;
+  }
+
+  button#reset-camera {
+    margin: 0.25rem auto;
+  }
+
+  ul.round-scores {
+    margin: 0.5rem auto 0.25rem;
   }
 
   #chat-messages {
-    max-height: 12vh;
-  } */
+    max-height: 10vh;
+  }
+
+  button {
+    padding: 0.25rem 0.5rem;
+  }
+
+  input[type="text"] {
+    padding: 0.25rem;
+  }
 }
