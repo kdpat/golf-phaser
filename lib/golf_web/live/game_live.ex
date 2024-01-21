@@ -17,10 +17,10 @@ defmodule GolfWeb.GameLive do
               <h4>Round <%= i + 1 %></h4>
               <ul>
                 <.player_score
-                  :for={{{name, score}, i} <- Enum.with_index(round_scores)}
-                  name={name}
+                  :for={{player, score} <- round_scores}
+                  name={player.user.name}
+                  turn={player.turn + 1}
                   score={score}
-                  turn={i + 1}
                 />
               </ul>
             </li>
@@ -119,7 +119,7 @@ defmodule GolfWeb.GameLive do
       game ->
         Golf.subscribe!(topic(game.id))
         data = GameData.new(game, socket.assigns.user)
-        scores = Games.info_scores(game)
+        scores = Games.game_scores(game) |> dbg()
 
         {:noreply,
          socket
@@ -149,7 +149,7 @@ defmodule GolfWeb.GameLive do
   @impl true
   def handle_info({:round_started, game}, socket) do
     data = GameData.new(game, socket.assigns.user)
-    scores = Games.info_scores(game)
+    scores = Games.game_scores(game)
 
     {:noreply,
      socket
@@ -160,7 +160,7 @@ defmodule GolfWeb.GameLive do
   @impl true
   def handle_info({:game_event, game, event}, socket) do
     data = GameData.new(game, socket.assigns.user)
-    scores = Games.info_scores(game)
+    scores = Games.game_scores(game)
 
     {:noreply,
      assign(socket, game: game, scores: scores)

@@ -291,11 +291,12 @@ button#reset-camera {
   }
 
   #game-info {
-    height: 40vh;
+    height: 33vh;
   }
 
   #game-info.active {
     opacity: 1;
+    min-height: 33vh;
   }
 
   #game-info:not(.active) {
