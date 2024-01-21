@@ -46,7 +46,7 @@ defmodule GolfWeb.GameLive do
 
   def chat(assigns) do
     ~H"""
-    <div>
+    <div id="chat">
       <.chat_messages messages={@messages} />
       <.chat_form submit={@submit} />
     </div>
@@ -66,17 +66,17 @@ defmodule GolfWeb.GameLive do
 
   defp chat_message(assigns) do
     ~H"""
-    <li id={@id}>
-      <span><%= @msg.inserted_at %></span>
-      <span><%= @msg.user.name %></span>:
-      <p><%= @msg.text %></p>
+    <li id={@id} class="chat-message">
+      <span class="timestamp"><%= @msg.inserted_at %></span>
+      <span class="username"><%= @msg.user.name %>:</span>
+      <span class="text"><%= @msg.text %></span>
     </li>
     """
   end
 
   def chat_form(assigns) do
     ~H"""
-    <form phx-submit={@submit}>
+    <form id="chat-form" phx-submit={@submit}>
       <.input
         id="chat-form-input"
         name="text"
