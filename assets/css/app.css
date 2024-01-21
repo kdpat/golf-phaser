@@ -40,7 +40,6 @@ header a:hover {
 #flash-info,
 #flash-error {
   text-align: center;
-  padding: 1rem;
 }
 
 #flash-info,
@@ -51,7 +50,6 @@ header a:hover {
 h2 {
   font-size: 1.5rem;
   color: #4a4a4a;
-  margin-bottom: 0.5rem;
 }
 
 button {
@@ -69,15 +67,6 @@ button:hover {
   background-color: #0069d9;
 }
 
-form {
-  margin-top: 1rem;
-}
-
-#create-game-button,
-#lobby-page button {
-  margin-top: 1rem;
-}
-
 input[type="text"],
 input[name="id"] {
   padding: 0.5rem;
@@ -90,6 +79,22 @@ input[type="text"]:focus,
 input[name="id"]:focus {
   border-color: #80bdff;
   outline: none;
+}
+
+#home-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+  height: calc(100vh - 1.5rem);
+}
+
+#create-game-button {
+  margin: 0 auto;
+}
+
+p.user {
+  margin-bottom: 1rem;
 }
 
 #players-list li {
@@ -129,20 +134,13 @@ input[name="id"]:focus {
   overflow: hidden;
 }
 
-#game-info li {
-  list-style-type: none;
-}
-
 ul.round-scores {
   display: flex;
   flex-direction: column;
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-height: 40vh;
   overflow-y: auto;
-  width: 80%;
-  margin: 0 auto;
 }
 
 ul.round-scores li {
@@ -157,12 +155,6 @@ ul.round-scores li:last-child {
 ul.round-scores li h4 {
   color: #007bff;
   font-size: 1.2rem;
-}
-
-ul.round-scores li ul {
-  padding: 0;
-  margin: 0;
-  list-style-type: none;
 }
 
 ul.round-scores li ul li {
@@ -187,7 +179,7 @@ ul.round-scores li ul li {
 }
 
 button#reset-camera {
-  margin: auto;
+  margin: 1rem auto;
 }
 
 #toggle-sidebar {
@@ -224,18 +216,14 @@ button#reset-camera {
   line-height: 1;
 }
 
-#chat {
-  margin: auto;
-}
-
 #chat-messages {
-  list-style: none;
   overflow-y: auto;
 }
 
 .chat-message {
   border-bottom: 1px solid #ddd;
   color: #666;
+  list-style-type: none;
 }
 
 .chat-message .username {
@@ -247,6 +235,9 @@ button#reset-camera {
   font-size: 0.6rem;
 }
 
+#chat-form-input {
+  text-align: center;
+}
 
 @media screen and (max-width: 600px) {
   #game-page {
@@ -272,12 +263,11 @@ button#reset-camera {
     opacity: 0;
   }
 
-  ul.round-scores {
+  /* ul.round-scores {
     max-height: 20vh;
-    min-height: 8vh;
   }
 
   #chat-messages {
     max-height: 12vh;
-  }
+  } */
 }

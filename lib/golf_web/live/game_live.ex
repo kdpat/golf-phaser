@@ -55,12 +55,9 @@ defmodule GolfWeb.GameLive do
 
   def chat_messages(assigns) do
     ~H"""
-    <div>
-      <h4>Messages</h4>
-      <ul id="chat-messages" phx-update="stream">
-        <.chat_message :for={{id, msg} <- @messages} id={id} msg={msg} />
-      </ul>
-    </div>
+    <ul id="chat-messages" phx-update="stream">
+      <.chat_message :for={{id, msg} <- @messages} id={id} msg={msg} />
+    </ul>
     """
   end
 

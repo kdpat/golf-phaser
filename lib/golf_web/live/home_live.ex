@@ -7,21 +7,21 @@ defmodule GolfWeb.HomeLive do
     <div id="home-page">
       <h2>Golf</h2>
 
-      <p>User: <%= "#{@user.name}(#{@user.id})" %></p>
-
-      <.form for={@name_form} phx-submit="update_username">
-        <.input type="text" field={@name_form[:name]} />
-        <button>Update Name</button>
-      </.form>
+      <button id="create-game-button" phx-click="create_lobby">
+        New Game
+      </button>
 
       <form phx-submit="join_lobby">
         <.input name="id" value="" placeholder="Game ID" required />
         <button>Join Game</button>
       </form>
 
-      <button id="create-game-button" phx-click="create_lobby">
-        New Game
-      </button>
+      <.form for={@name_form} phx-submit="update_username">
+        <.input type="text" field={@name_form[:name]} />
+        <button>Update Name</button>
+      </.form>
+
+      <p class="user">User: <%= "#{@user.name}(id=#{@user.id})" %></p>
     </div>
     """
   end
