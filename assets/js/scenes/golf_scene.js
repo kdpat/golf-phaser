@@ -766,7 +766,7 @@ function makePlayable(cardImg, callback) {
   cardImg.setInteractive({ cursor: "pointer" });
   cardImg.off("pointerdown");
   cardImg.on("pointerdown", () => {
-    cardImg.setTint(0xff00ff);
+    cardImg.setTint(0xffaaff)
     callback(cardImg)
   });
 }

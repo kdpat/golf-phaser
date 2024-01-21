@@ -84,7 +84,7 @@ input[name="id"]:focus {
 #home-page {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 1.5rem);
+  height: calc(var(--vh, 1vh) * 100 - 1.5rem);
 }
 
 #home-page > h2 {
@@ -101,8 +101,7 @@ input[name="id"]:focus {
 }
 
 p.user {
-  margin-top: auto;
-  margin-bottom: 1rem;
+  margin: auto auto 2rem;
 }
 
 #players-list li {
@@ -324,13 +323,13 @@ button#reset-camera {
     display: none;
   }
 
-  button#reset-camera {
+  /* button#reset-camera {
     margin: 0.25rem auto 0.5rem;
   }
 
   .round-scores {
     margin: 0.25rem auto 0;
-  }
+  } */
 
   #chat {
     margin: auto;
@@ -340,11 +339,11 @@ button#reset-camera {
     max-height: 12vh;
   }
 
-  button {
+  /* button {
     padding: 0.25rem 0.5rem;
   }
 
   input[type="text"] {
     padding: 0.25rem;
-  }
+  } */
 }
