@@ -30,6 +30,7 @@ export class GolfScene extends Phaser.Scene {
 
   create() {
     this.setupCamera();
+    this.setupPinchZoom();
     this.setupMouseWheelZoom();
     this.setupMouseDragging();
     // this.setupKeyListeners();
@@ -37,20 +38,10 @@ export class GolfScene extends Phaser.Scene {
     this.onGameLoad(this.golfGame);
   }
 
-  // update() {
-  //   if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
-  //     this.resetCamera();
-  //   }
-  // }
-
   resetCamera() {
     this.camera.setZoom(1);
     this.camera.centerOn(GAME_WIDTH / 2, GAME_HEIGHT / 2);
   }
-
-  // setupKeyListeners() {
-  //   this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-  // }
 
   setupEventListeners() {
     EMITTER.on("game_loaded", this.onGameLoad, this);
@@ -69,6 +60,69 @@ export class GolfScene extends Phaser.Scene {
       maxY: GAME_HEIGHT / 2,
     };
   }
+
+  setupPinchZoom() {
+    this.firstTouch = null;
+
+    this.input.on('pointerdown', (pointer) => {
+        if (pointer.isDown && pointer.event.touches && pointer.event.touches.length === 1) {
+            this.firstTouch = { x: pointer.x, y: pointer.y };
+        } else if (pointer.isDown && pointer.event.touches && pointer.event.touches.length === 2) {
+            this.startPinchDistance = Phaser.Math.Distance.Between(
+                pointer.event.touches[0].clientX, pointer.event.touches[0].clientY,
+                pointer.event.touches[1].clientX, pointer.event.touches[1].clientY
+            );
+            this.isPinching = true;
+        }
+    });
+
+    this.input.on('pointermove', (pointer) => {
+        if (this.isPinching && pointer.event.touches && pointer.event.touches.length === 2) {
+            const currentPinchDistance = Phaser.Math.Distance.Between(
+                pointer.event.touches[0].clientX, pointer.event.touches[0].clientY,
+                pointer.event.touches[1].clientX, pointer.event.touches[1].clientY
+            );
+            const zoomFactor = currentPinchDistance / this.startPinchDistance;
+            this.cameras.main.setZoom(this.cameras.main.zoom * zoomFactor);
+            this.startPinchDistance = currentPinchDistance;
+        }
+    });
+
+    this.input.on('pointerup', (pointer) => {
+        if (pointer.event.touches && pointer.event.touches.length < 2) {
+            this.isPinching = false;
+            this.firstTouch = null;
+        }
+    });
+}
+
+  // setupPinchZoom() {
+  //   this.input.on('pointerdown', (pointer) => {
+  //     if (pointer.isDown && pointer.event.touches && pointer.event.touches.length === 2) {
+  //       this.startPinchDistance = Phaser.Math.Distance.Between(
+  //         pointer.event.touches[0].clientX, pointer.event.touches[0].clientY,
+  //         pointer.event.touches[1].clientX, pointer.event.touches[1].clientY
+  //       );
+  //       this.isPinching = true;
+  //     }
+  //   });
+
+  //   this.input.on('pointermove', (pointer) => {
+  //     if (this.isPinching && pointer.event.touches && pointer.event.touches.length === 2) {
+  //       const currentPinchDistance = Phaser.Math.Distance.Between(
+  //         pointer.event.touches[0].clientX, pointer.event.touches[0].clientY,
+  //         pointer.event.touches[1].clientX, pointer.event.touches[1].clientY
+  //       );
+  //       const zoomFactor = currentPinchDistance / this.startPinchDistance;
+  //       this.cameras.main.setZoom(this.cameras.main.zoom * zoomFactor);
+  //       this.startPinchDistance = currentPinchDistance;
+  //     }
+  //   });
+
+  //   this.input.on('pointerup', () => {
+  //     this.isPinching = false;
+  //   });
+  // }
 
   setupMouseWheelZoom() {
     const zoomFactor = 0.1;
@@ -681,7 +735,7 @@ export class GolfScene extends Phaser.Scene {
       this.startButton.background.clear();
       this.startButton.background.fillStyle(bgColor, 1);
       this.startButton.background.fillRoundedRect(0, 0, width, height, radius);
-    });    
+    });
   }
 
   destroyStartGameButton() {
@@ -711,7 +765,10 @@ function makePlayable(cardImg, callback) {
   cardImg.setTint(0x00ffff);
   cardImg.setInteractive({ cursor: "pointer" });
   cardImg.off("pointerdown");
-  cardImg.on("pointerdown", () => callback(cardImg));
+  cardImg.on("pointerdown", () => {
+    cardImg.setTint(0xff00ff);
+    callback(cardImg)
+  });
 }
 
 function makeUnplayable(cardImg) {
@@ -729,3 +786,13 @@ function playerColor(player) {
 function rotate(arr, n) {
   return arr.slice(n).concat(arr.slice(0, n));
 }
+
+// update() {
+//   if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
+//     this.resetCamera();
+//   }
+// }
+
+// setupKeyListeners() {
+//   this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+// }
