@@ -65,7 +65,7 @@ defmodule GolfWeb.GameLive do
     ~H"""
     <li id={@id} class="chat-message">
       <span class="timestamp"><%= @msg.inserted_at %></span>
-      <span class="username turn-1"><%= @msg.user.name %>:</span>
+      <span class={"username turn-#{@msg.turn}"}><%= @msg.user.name %>:</span>
       <span class="text"><%= @msg.text %></span>
     </li>
     """
@@ -130,7 +130,18 @@ defmodule GolfWeb.GameLive do
 
   @impl true
   def handle_info({:load_chat_messages, id}, socket) do
-    messages = Golf.Chat.get_messages(id)
+    messages =
+      Golf.Chat.get_messages(id)
+      |> Enum.map(fn msg ->
+        turn = find_user_turn(socket.assigns.game.players, msg.user_id)
+
+        if turn do
+          Map.put(msg, :turn, turn)
+        else
+          msg
+        end
+      end)
+
     Golf.subscribe!("chat:#{id}")
     {:noreply, stream(socket, :chat_messages, messages, at: 0)}
   end
@@ -158,6 +169,15 @@ defmodule GolfWeb.GameLive do
 
   @impl true
   def handle_info({:new_chat_message, message}, socket) do
+    player = find_player_by_user_id(socket.assigns.game.players, message.user_id)
+
+    message =
+      if player do
+        Map.put(message, :turn, player.turn + 1)
+      else
+        message
+      end
+
     {:noreply, stream_insert(socket, :chat_messages, message, at: 0)}
   end
 
@@ -219,5 +239,10 @@ defmodule GolfWeb.GameLive do
 
   defp find_player_by_user_id(players, user_id) do
     Enum.find(players, fn p -> p.user_id == user_id end)
+  end
+
+  defp find_user_turn(players, user_id) do
+    player = find_player_by_user_id(players, user_id)
+    player && player.turn + 1
   end
 end

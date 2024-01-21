@@ -260,17 +260,17 @@ button#reset-camera {
   color: #9c27b0;
 }
 
-/* .player-score.turn-2 > .player-name {
+.username.turn-2 {
   color: #009688;
 }
 
-.player-score.turn-3 > .player-name {
+.username.turn-3 {
   color: #ff9800;
 }
 
-.player-score.turn-4 > .player-name {
+.username.turn-4 {
   color: #8bc34a;
-} */
+}
 
 #chat-form {
   display: flex;
