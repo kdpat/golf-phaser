@@ -7,6 +7,8 @@ defmodule Golf.Application do
 
   @impl true
   def start(_type, _args) do
+    Golf.Release.migrate()
+
     children = [
       GolfWeb.Telemetry,
       Golf.Repo,

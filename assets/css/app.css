@@ -128,7 +128,8 @@ p.user {
 
 #game-page {
   display: flex;
-  height: calc(100vh - 1.5rem);
+  /* height: calc(100vh - 1.5rem); */
+  height: calc(var(--vh, 1vh) * 100 - 1.5rem);
   background-color: #f0f0f0;
 }
 
@@ -297,6 +298,7 @@ button#reset-camera {
 @media screen and (max-width: 600px) {
   #game-page {
     flex-direction: column;
+    height: calc(var(--vh, 1vh) * 100 - 1.5rem);
   }
 
   #game-canvas {
@@ -304,15 +306,13 @@ button#reset-camera {
   }
 
   #game-info {
-    height: 30vh;
-    max-height: 30vh;
+    flex-basis: 20vh;
     font-size: smaller;
-    margin-right: 0;
   }
 
   #game-info.active {
     opacity: 1;
-    flex-basis: 30vh;
+    flex-basis: 20vh;
   }
 
   #game-info:not(.active) {
@@ -337,7 +337,7 @@ button#reset-camera {
   }
 
   #chat-messages {
-    height: 12vh;
+    max-height: 12vh;
   }
 
   button {

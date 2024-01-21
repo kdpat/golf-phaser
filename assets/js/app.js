@@ -61,6 +61,17 @@ window.addEventListener("phx:clear-chat-input", _ => {
   inputEl.value = "";
 });
 
+// set vh property
+let vh = window.innerHeight * 0.01;
+document.documentElement.style.setProperty("--vh", `${vh}px`);
+
+// set vh on resize
+window.addEventListener('resize', () => {
+  let vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+});
+
+// setup livesocket
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
 let liveSocket = new LiveSocket(
