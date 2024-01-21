@@ -84,15 +84,24 @@ input[name="id"]:focus {
 #home-page {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: calc(100vh - 1.5rem);
+  min-height: calc(100vh - 1.5rem);
+}
+
+#home-page > h2 {
+  margin: 0;
 }
 
 #create-game-button {
-  margin: 0 auto;
+  margin: 1rem auto;
+}
+
+#home-page > form {
+  margin: 1rem auto 0;
+  display: flex;
 }
 
 p.user {
+  margin-top: auto;
   margin-bottom: 1rem;
 }
 
@@ -119,7 +128,7 @@ p.user {
 
 #game-page {
   display: flex;
-  flex-direction: row;
+  /* flex-direction: row; */
   height: calc(100vh - 1.5rem);
   background-color: #f0f0f0;
 }
@@ -139,6 +148,7 @@ p.user {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  margin: 0 0.5rem 0 1rem;
 }
 
 #game-info.active {
@@ -160,7 +170,7 @@ ul.round-scores {
   margin: 0 auto;
   padding: 0 50px;
   max-height: 33vh;
-  /* min-height: 80px; */
+  min-height: 2.9rem;
 }
 
 ul.round-scores li {
@@ -174,12 +184,12 @@ ul.round-scores li:last-child {
 
 ul.round-scores li h4 {
   color: #007bff;
-  font-size: 1.2rem;
+  /* font-size: 1.2rem; */
 }
 
 ul.round-scores li ul li {
   color: #333;
-  font-size: 1rem;
+  /* font-size: 1rem; */
 }
 
 .player-score.turn-1 > .player-name {
@@ -275,6 +285,7 @@ button#reset-camera {
 #chat-form {
   display: flex;
   justify-content: center;
+  margin-top: 0.5rem;
 }
 
 #chat-form-input {
@@ -291,12 +302,15 @@ button#reset-camera {
   }
 
   #game-info {
-    height: 33vh;
+    height: 28vh;
+    max-height: 28vh;
+    font-size: smaller;
+    margin-right: 0;
   }
 
   #game-info.active {
     opacity: 1;
-    min-height: 33vh;
+    flex-basis: 28vh;
   }
 
   #game-info:not(.active) {
@@ -309,11 +323,11 @@ button#reset-camera {
   }
 
   button#reset-camera {
-    margin: 0.25rem auto;
+    margin: 0 auto 0.5rem;
   }
 
   ul.round-scores {
-    margin: 0.5rem auto 0.25rem;
+    margin: 0.25rem auto 0;
   }
 
   #chat-messages {

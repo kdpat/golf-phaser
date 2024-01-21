@@ -119,7 +119,7 @@ defmodule GolfWeb.GameLive do
       game ->
         Golf.subscribe!(topic(game.id))
         data = GameData.new(game, socket.assigns.user)
-        scores = Games.game_scores(game) |> dbg()
+        scores = Games.scores(game)
 
         {:noreply,
          socket
@@ -128,19 +128,12 @@ defmodule GolfWeb.GameLive do
     end
   end
 
+
   @impl true
   def handle_info({:load_chat_messages, id}, socket) do
     messages =
       Golf.Chat.get_messages(id)
-      |> Enum.map(fn msg ->
-        turn = find_user_turn(socket.assigns.game.players, msg.user_id)
-
-        if turn do
-          Map.put(msg, :turn, turn)
-        else
-          msg
-        end
-      end)
+      |> Enum.map(&put_turn(&1, socket.assigns.game.players))
 
     Golf.subscribe!("chat:#{id}")
     {:noreply, stream(socket, :chat_messages, messages, at: 0)}
@@ -149,7 +142,7 @@ defmodule GolfWeb.GameLive do
   @impl true
   def handle_info({:round_started, game}, socket) do
     data = GameData.new(game, socket.assigns.user)
-    scores = Games.game_scores(game)
+    scores = Games.scores(game)
 
     {:noreply,
      socket
@@ -160,7 +153,7 @@ defmodule GolfWeb.GameLive do
   @impl true
   def handle_info({:game_event, game, event}, socket) do
     data = GameData.new(game, socket.assigns.user)
-    scores = Games.game_scores(game)
+    scores = Games.scores(game)
 
     {:noreply,
      assign(socket, game: game, scores: scores)
@@ -169,15 +162,7 @@ defmodule GolfWeb.GameLive do
 
   @impl true
   def handle_info({:new_chat_message, message}, socket) do
-    player = find_player_by_user_id(socket.assigns.game.players, message.user_id)
-
-    message =
-      if player do
-        Map.put(message, :turn, player.turn + 1)
-      else
-        message
-      end
-
+    message = put_turn(message, socket.assigns.game.players)
     {:noreply, stream_insert(socket, :chat_messages, message, at: 0)}
   end
 
@@ -244,5 +229,10 @@ defmodule GolfWeb.GameLive do
   defp find_user_turn(players, user_id) do
     player = find_player_by_user_id(players, user_id)
     player && player.turn + 1
+  end
+
+  defp put_turn(chat_message, players) do
+    turn = find_user_turn(players, chat_message.user_id) || 0
+    Map.put(chat_message, :turn, turn)
   end
 end

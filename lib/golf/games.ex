@@ -41,50 +41,6 @@ defmodule Golf.Games do
     end
   end
 
-  defp num_cards_face_up(hand) do
-    Enum.count(hand, & &1["face_up?"])
-  end
-
-  defp all_face_up?(hand) do
-    num_cards_face_up(hand) == @hand_size
-  end
-
-  defp one_face_down?(hand) do
-    num_cards_face_up(hand) == @hand_size - 1
-  end
-
-  defp two_face_up?(hand) do
-    num_cards_face_up(hand) >= 2
-  end
-
-  defp face_down_cards(hand) do
-    hand
-    |> Enum.with_index()
-    |> Enum.reject(fn {card, _} -> card["face_up?"] end)
-    |> Enum.map(fn {_, index} -> String.to_existing_atom("hand_#{index}") end)
-  end
-
-  defp flip_card(card) do
-    %{card | "face_up?" => true}
-  end
-
-  defp flip_card_at(hand, index) do
-    List.update_at(hand, index, &flip_card/1)
-  end
-
-  defp flip_all(hand) do
-    Enum.map(hand, &flip_card/1)
-  end
-
-  defp maybe_flip_all(hand, true), do: flip_all(hand)
-  defp maybe_flip_all(hand, _), do: hand
-
-  defp swap_card(hand, index, new_card) do
-    old_card = Enum.at(hand, index)["name"]
-    hand = List.replace_at(hand, index, %{"name" => new_card, "face_up?" => true})
-    {hand, old_card}
-  end
-
   def current_round(%Game{rounds: [round | _]}), do: round
 
   def current_round(_), do: nil
@@ -370,54 +326,19 @@ defmodule Golf.Games do
     }
   end
 
-  def info_scores(%Game{rounds: []} = game) do
-    game.players
-    # if there's no round, give each player a score of 0
-    |> Enum.map(fn p -> {p.user.name, 0} end)
-    |> Enum.into(%{})
-    |> List.wrap()
-  end
-
-  def info_scores(%Game{} = game) do
-    scores(game)
-    |> Enum.map(&put_score_usernames(&1, game.players))
-    |> Enum.map(fn scores ->
-      Enum.sort(scores, fn {_, score1}, {_, score2} -> score1 < score2 end)
-    end)
-  end
-
-  defp put_score_usernames(round_scores, players) do
-    round_scores
-    |> Enum.map(fn {id, score} ->
-      username = get_username(players, id)
-      {username, score}
-    end)
-    |> Enum.into(%{})
-  end
-
-  def get_username(players, player_id) do
-    players
-    |> Enum.find(&(&1.id == player_id))
-    |> Map.get(:user)
-    |> Map.get(:name)
+  def scores(%Game{rounds: []} = game) do
+    # if there are no rounds, give each player a score of 0
+    [
+      Enum.map(game.players, &{&1, 0})
+      |> List.wrap()
+    ]
   end
 
   def scores(game) do
-    player_ids = Enum.map(game.players, & &1.id)
-    Enum.map(game.rounds, &round_scores(&1, player_ids))
+    Enum.map(game.rounds, &round_scores(&1, game.players))
   end
 
-  def round_scores(round, player_ids) do
-    player_ids
-    |> Enum.map(fn pid -> {pid, player_score(round.hands, pid)} end)
-    |> Enum.into(%{})
-  end
-
-  def game_scores(game) do
-    Enum.map(game.rounds, &round_player_scores(&1, game.players))
-  end
-
-  def round_player_scores(round, players) do
+  def round_scores(round, players) do
     players
     |> Enum.map(fn player ->
       score = player_score(round.hands, player.id)
@@ -545,5 +466,49 @@ defmodule Golf.Games do
         |> Enum.reject(&is_nil/1)
         |> Enum.reduce(total, fn rank, acc -> rank_value(rank) + acc end)
     end
+  end
+
+  defp num_cards_face_up(hand) do
+    Enum.count(hand, & &1["face_up?"])
+  end
+
+  defp all_face_up?(hand) do
+    num_cards_face_up(hand) == @hand_size
+  end
+
+  defp one_face_down?(hand) do
+    num_cards_face_up(hand) == @hand_size - 1
+  end
+
+  defp two_face_up?(hand) do
+    num_cards_face_up(hand) >= 2
+  end
+
+  defp face_down_cards(hand) do
+    hand
+    |> Enum.with_index()
+    |> Enum.reject(fn {card, _} -> card["face_up?"] end)
+    |> Enum.map(fn {_, index} -> String.to_existing_atom("hand_#{index}") end)
+  end
+
+  defp flip_card(card) do
+    %{card | "face_up?" => true}
+  end
+
+  defp flip_card_at(hand, index) do
+    List.update_at(hand, index, &flip_card/1)
+  end
+
+  defp flip_all(hand) do
+    Enum.map(hand, &flip_card/1)
+  end
+
+  defp maybe_flip_all(hand, true), do: flip_all(hand)
+  defp maybe_flip_all(hand, _), do: hand
+
+  defp swap_card(hand, index, new_card) do
+    old_card = Enum.at(hand, index)["name"]
+    hand = List.replace_at(hand, index, %{"name" => new_card, "face_up?" => true})
+    {hand, old_card}
   end
 end
