@@ -15,7 +15,7 @@ defmodule GolfWeb.GameLive do
           <%= for {round_scores, i} <- @scores |> Enum.reverse() |> Enum.with_index() |> Enum.reverse() do %>
             <li>
               <h4>Round <%= i + 1 %></h4>
-              <ul>
+              <ul class="player-scores">
                 <.player_score
                   :for={{player, score} <- round_scores}
                   name={player.user.name}
