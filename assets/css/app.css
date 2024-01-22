@@ -81,6 +81,7 @@ button {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
+  font-size: 16px;
 }
 
 button:hover {
@@ -93,6 +94,7 @@ input[name="id"] {
   border: 1px solid #ddd;
   border-radius: 4px;
   margin-right: 0.5rem;
+  font-size: 16px;
 }
 
 input[type="text"]:focus,
@@ -250,9 +252,12 @@ p.user {
   margin: 0 0.5rem;
 }
 
-button#reset-camera {
-  margin: 0.5rem auto;
-  flex-shrink: 0;
+#camera-controls {
+  margin: 0.5rem;
+}
+
+#camera-controls > * {
+  font-size: 16px;
 }
 
 #chat {
@@ -288,6 +293,11 @@ button#reset-camera {
 
 #chat-form-input {
   text-align: center;
+  font-size: 16px;
+}
+
+#chat-form button {
+  font-size: 16px;
 }
 
 .player-score.turn-1 > .player-name {

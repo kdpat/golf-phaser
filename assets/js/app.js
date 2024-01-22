@@ -71,6 +71,32 @@ document.addEventListener('DOMContentLoaded', () => {
       copyToClipboardAndNotify(link);
     });
   });
+
+  // zoom buttons
+  const zoomInButton = document.getElementById('zoom-in');
+  const zoomOutButton = document.getElementById('zoom-out');
+
+  const zoomFactor = 0.15;
+
+  if (zoomInButton) {
+    zoomInButton.addEventListener('click', e => {
+      e.preventDefault();
+      const camera = phaserGame.scene.getScene("GolfScene").camera;
+      if (camera && camera.zoom < 2) {
+        camera.zoom += zoomFactor;
+      }
+    });
+  }
+
+  if (zoomOutButton) {
+    zoomOutButton.addEventListener('click', e => {
+      e.preventDefault();
+      const camera = phaserGame.scene.getScene("GolfScene").camera;
+      if (camera && camera.zoom > 0.5) {
+        camera.zoom -= zoomFactor;
+      }
+    });
+  }
 });
 
 // clear chat after submit

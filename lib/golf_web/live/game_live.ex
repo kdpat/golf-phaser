@@ -27,7 +27,11 @@ defmodule GolfWeb.GameLive do
           <% end %>
         </ul>
         <.chat messages={@streams.chat_messages} submit="submit_chat" />
-        <button id="reset-camera">Reset Camera</button>
+        <div id="camera-controls">
+          <button id="zoom-out">-</button>
+          <button id="zoom-in">+</button>
+          <button id="reset-camera">Reset Camera</button>
+        </div>
       </div>
       <div id="toggle-sidebar" phx-click="toggle_sidebar"></div>
     </div>
@@ -74,13 +78,7 @@ defmodule GolfWeb.GameLive do
   def chat_form(assigns) do
     ~H"""
     <form id="chat-form" phx-submit={@submit}>
-      <.input
-        id="chat-form-input"
-        name="text"
-        value=""
-        placeholder="Type here..."
-        required
-      />
+      <.input id="chat-form-input" name="text" value="" placeholder="Type message here..." required />
       <.button>Submit</.button>
     </form>
     """
@@ -127,7 +125,6 @@ defmodule GolfWeb.GameLive do
          |> push_event("game_loaded", %{"game" => data})}
     end
   end
-
 
   @impl true
   def handle_info({:load_chat_messages, id}, socket) do

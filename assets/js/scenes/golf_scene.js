@@ -34,6 +34,7 @@ export class GolfScene extends Phaser.Scene {
     this.setupMouseDragging();
     // this.setupKeyListeners();
     this.setupEventListeners();
+
     this.onGameLoad(this.golfGame);
   }
 

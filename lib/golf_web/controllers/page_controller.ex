@@ -19,9 +19,7 @@ defmodule GolfWeb.PageController do
           user = conn.assigns.user
           {:ok, lobby} = Golf.Lobbies.add_lobby_user(lobby, user)
           Golf.broadcast!("lobby:#{id}", {:user_joined, lobby, user})
-
-          conn
-          |> redirect(to: ~p"/lobby/#{id}")
+          redirect(conn, to: ~p"/lobby/#{id}")
         else
           conn
           |> put_flash(:error, "Game #{id} already started.")
