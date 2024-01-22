@@ -6,25 +6,30 @@ defmodule GolfWeb.PageController do
   end
 
   def join_lobby(conn, %{"id" => id}) do
-    id = id |> String.trim() |> String.downcase()
+    with id <- String.trim(id) |> String.downcase(),
+         {:started, false} <- {:started, Golf.GamesDb.game_exists?(id)},
+         lobby <- Golf.Lobbies.get_lobby(id),
+         {:exists, true} <- {:exists, is_struct(lobby)},
+         user <- conn.assigns.user,
+         {:ok, lobby} <- Golf.Lobbies.add_lobby_user(lobby, user) do
+      Golf.broadcast!("lobby:#{id}", {:user_joined, lobby, user})
 
-    case Golf.Lobbies.get_lobby(id) do
-      nil ->
+      conn
+      |> put_flash(:info, "Joined lobby #{id}.")
+      |> redirect(to: ~p"/lobby/#{id}")
+    else
+      {:started, _} ->
         conn
-        |> put_flash(:error, "Game #{id} not found.")
+        |> put_flash(:error, "Game #{id} already started.")
         |> redirect(to: ~p"/")
 
-      lobby ->
-        unless Golf.GamesDb.game_exists?(id) do
-          user = conn.assigns.user
-          {:ok, lobby} = Golf.Lobbies.add_lobby_user(lobby, user)
-          Golf.broadcast!("lobby:#{id}", {:user_joined, lobby, user})
-          redirect(conn, to: ~p"/lobby/#{id}")
-        else
-          conn
-          |> put_flash(:error, "Game #{id} already started.")
-          |> redirect(to: ~p"/")
-        end
+      {:exists, _} ->
+        conn
+        |> put_flash(:error, "Game #{id} not found")
+        |> redirect(to: ~p"/")
+
+      _ ->
+        redirect(conn, to: ~p"/")
     end
   end
 end
