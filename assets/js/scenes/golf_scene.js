@@ -612,8 +612,8 @@ export class GolfScene extends Phaser.Scene {
       Phaser.Geom.Rectangle.Contains
     );
 
-    this.startButton.text = this.add.text(GAME_WIDTH / 2, bgY + height / 2, 'Start Game', {
-      font: '48px sans-serif',
+    this.startButton.text = this.add.text(GAME_WIDTH / 2, bgY + height / 2, 'DEAL CARDS', {
+      font: '42px sans-serif',
       fill: textColor
     }).setOrigin(0.5);
 
@@ -653,8 +653,8 @@ export class GolfScene extends Phaser.Scene {
       Phaser.Geom.Rectangle.Contains
     );
 
-    this.startButton.text = this.add.text(GAME_WIDTH / 2, bgY + height / 2, 'Next Round', {
-      font: '48px sans-serif',
+    this.startButton.text = this.add.text(GAME_WIDTH / 2, bgY + height / 2, 'DEAL CARDS', {
+      font: '42px sans-serif',
       fill: textColor
     }).setOrigin(0.5);
 

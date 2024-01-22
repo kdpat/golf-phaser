@@ -17,10 +17,10 @@ defmodule GolfWeb.GameLive do
               <h4>Round <%= i + 1 %></h4>
               <ul class="player-scores">
                 <.player_score
-                  :for={{player, score} <- round_scores}
+                  :for={player <- round_scores}
                   name={player.user.name}
                   turn={player.turn + 1}
-                  score={score}
+                  score={player.score}
                 />
               </ul>
             </li>

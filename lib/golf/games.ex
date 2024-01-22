@@ -325,22 +325,38 @@ defmodule Golf.Games do
   def scores(%Game{rounds: []} = game) do
     # if there are no rounds, give each player a score of 0
     [
-      Enum.map(game.players, &{&1, 0})
+      Enum.map(game.players, &Map.put(&1, :score, 0))
       |> List.wrap()
     ]
   end
 
   def scores(game) do
-    Enum.map(game.rounds, &round_scores(&1, game.players))
+    Enum.map(game.rounds, &put_scores(&1, game.players))
   end
 
-  def round_scores(round, players) do
+  def put_scores(round, players) do
     players
-    |> Enum.map(fn player ->
-      score = player_score(round.hands, player.id)
-      {player, score}
+    |> Enum.map(fn p -> Map.put(p, :score, player_score(round.hands, p.id)) end)
+    |> double_set_player(round)
+    |> Enum.sort(fn p1, p2 -> p1.score < p2.score end)
+  end
+
+  def double_set_player(players, round) when round.state == :round_over do
+    Enum.map(players, fn p ->
+      if p.id == round.first_player_flipped_id and p.score > 0 and any_lower_score?(players, p) do
+        Map.update!(p, :score, &(&1 * 2))
+      else
+        p
+      end
     end)
-    |> Enum.sort(fn {_, score1}, {_, score2} -> score1 < score2 end)
+  end
+
+  def double_set_player(players, _), do: players
+
+  def any_lower_score?(players, player) do
+    Enum.any?(players, fn p ->
+      p.id != player.id and p.score < player.score
+    end)
   end
 
   def player_score(hands, player_id) do

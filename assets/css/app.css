@@ -21,8 +21,8 @@ body {
 header {
   background-color: #e0e0e0;
   color: #333;
-  height: 1.5rem;
-  line-height: 1.5rem;
+  height: 2rem;
+  line-height: 2rem;
   text-align: center;
   padding: 0 1rem;
   display: flex;
@@ -51,10 +51,13 @@ header a:hover {
 #flash-error {
   cursor: pointer;
   padding: 1rem;
-  margin: 1rem 0;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s;
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  transform: translate(-50%);
 }
 
 #flash-info {
@@ -111,11 +114,11 @@ input[name="id"]:focus {
 #home-page {
   display: flex;
   flex-direction: column;
-  height: calc(var(--vh, 1vh) * 100 - 1.5rem);
+  height: calc(var(--vh, 1vh) * 100 - 2rem);
 }
 
 #home-page > h2 {
-  margin: 0;
+  margin: 1rem auto;
 }
 
 #create-game-button {
@@ -123,12 +126,16 @@ input[name="id"]:focus {
 }
 
 #home-page > form {
-  margin: 1rem auto 0;
+  margin: 1rem auto;
   display: flex;
 }
 
 #home-page > p.user {
   margin: auto auto 1rem;
+}
+
+#lobby-page > h2 {
+  margin: 1rem auto;
 }
 
 #lobby-page > p.user {
@@ -150,7 +157,7 @@ input[name="id"]:focus {
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  height: calc(var(--vh, 1vh) * 100 - 1.5rem);
+  height: calc(var(--vh, 1vh) * 100 - 2rem);
 }
 
 #lobby-page > * {
@@ -194,8 +201,7 @@ input[name="id"]:focus {
 
 #game-page {
   display: flex;
-  /* height: calc(100vh - 1.5rem); */
-  height: calc(var(--vh, 1vh) * 100 - 1.5rem);
+  height: calc(var(--vh, 1vh) * 100 - 2rem);
   background-color: #f0f0f0;
 }
 
@@ -373,7 +379,7 @@ input[name="id"]:focus {
 @media screen and (max-width: 600px) {
   #game-page {
     flex-direction: column;
-    height: calc(var(--vh, 1vh) * 100 - 1.5rem);
+    height: calc(var(--vh, 1vh) * 100 - 2rem);
   }
 
   #game-canvas {
