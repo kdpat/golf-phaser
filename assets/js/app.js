@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       await navigator.clipboard.writeText(linkElement.textContent || linkElement.innerText);
       linkElement.classList.add('copied-notification');
-      setTimeout(() => { linkElement.classList.remove('copied-notification'); }, 2000);
+      setTimeout(() => { linkElement.classList.remove('copied-notification'); }, 1000);
     } catch (err) {
       console.error('Failed to copy: ', err);
     }

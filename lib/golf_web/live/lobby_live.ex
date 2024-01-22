@@ -7,8 +7,10 @@ defmodule GolfWeb.LobbyLive do
     <div id="lobby-page">
       <h2>Lobby <%= @id %></h2>
 
-      <p class="lobby-link-info">Send this link to invite players:</p>
-      <div class="lobby-link"><%= @join_url %></div>
+      <div>
+        <p class="lobby-link-info">Send this link to invite players:</p>
+        <div class="lobby-link"><%= @join_url %></div>
+      </div>
 
       <div class="players">
         <h4>Players</h4>
@@ -18,17 +20,27 @@ defmodule GolfWeb.LobbyLive do
           </li>
         </ul>
       </div>
-      <!--
+
+      <div>
+        <!--
       @game_exists? will be nil on mount, and true or false after the db is checked.
       If it's nil (the data isn't loaded yet) we don't want to show it, so explicitly check for false.
       -->
-      <button :if={@host? && @game_exists? == false} phx-click="start_game">
-        Start Game
-      </button>
+        <button :if={@host? && @game_exists? == false} phx-click="start_game">
+          Start Game
+        </button>
 
-      <button :if={@game_exists?} phx-click="go_to_game">
-        Go To Game
-      </button>
+        <button :if={@game_exists?} phx-click="go_to_game">
+          Go To Game
+        </button>
+      </div>
+
+      <.form class="username-form" for={@name_form} phx-submit="update_username">
+        <.input type="text" field={@name_form[:name]} />
+        <button>Update Name</button>
+      </.form>
+
+      <p class="user">User: <%= "#{@user.name}(id=#{@user.id})" %></p>
     </div>
     """
   end
@@ -37,6 +49,7 @@ defmodule GolfWeb.LobbyLive do
   def mount(%{"id" => id}, session, socket) do
     user = Golf.Users.get_user_by_session_id(session["session_id"])
     join_url = "#{GolfWeb.Endpoint.url()}/lobby/join/#{id}"
+    name_form = Golf.Users.change_user(user) |> to_form()
 
     if connected?(socket) do
       send(self(), {:load_lobby, id})
@@ -52,7 +65,8 @@ defmodule GolfWeb.LobbyLive do
        join_url: join_url,
        lobby: nil,
        host?: nil,
-       game_exists?: nil
+       game_exists?: nil,
+       name_form: name_form
      )
      |> stream(:users, [])}
   end
@@ -98,6 +112,14 @@ defmodule GolfWeb.LobbyLive do
   end
 
   @impl true
+  def handle_info({:username_updated, lobby, _updated_user}, socket) do
+    {:noreply,
+     socket
+     |> assign(lobby: lobby)
+     |> stream(:users, lobby.users)}
+  end
+
+  @impl true
   def handle_event("start_game", _params, socket) do
     id = socket.assigns.id
     game = Golf.GamesDb.create_game(id, socket.assigns.user, socket.assigns.lobby.users)
@@ -108,6 +130,21 @@ defmodule GolfWeb.LobbyLive do
   @impl true
   def handle_event("go_to_game", _params, socket) do
     {:noreply, redirect(socket, to: ~p"/game/#{socket.assigns.id}")}
+  end
+
+  @impl true
+  def handle_event("update_username", %{"user" => user_params}, socket) do
+    case Golf.Users.update_user(socket.assigns.user, user_params) do
+      {:ok, user} ->
+        id = socket.assigns.id
+        lobby = Golf.Lobbies.get_lobby(id)
+        Golf.broadcast!(topic(id), {:username_updated, lobby, user})
+        form = Golf.Users.change_user(user) |> to_form()
+        {:noreply, assign(socket, user: user, lobby: lobby, name_form: form)}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, name_form: to_form(changeset))}
+    end
   end
 
   defp topic(id), do: "lobby:#{id}"

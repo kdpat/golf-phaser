@@ -2,6 +2,7 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  font-size: 16px;
 }
 
 html,
@@ -126,8 +127,19 @@ input[name="id"]:focus {
   display: flex;
 }
 
-p.user {
-  margin: auto auto 2rem;
+#home-page > p.user {
+  margin: auto auto 1rem;
+}
+
+#lobby-page > p.user {
+  flex-grow: 0;
+  margin: auto auto 1rem;
+}
+
+#lobby-page > .username-form {
+  flex-grow: 0;
+  margin: 1rem auto;
+  display: flex;
 }
 
 #players-list li {
@@ -137,23 +149,12 @@ p.user {
 #lobby-page {
   display: flex;
   flex-direction: column;
+  justify-content: space-evenly;
+  height: calc(var(--vh, 1vh) * 100 - 1.5rem);
 }
 
-#lobby-page > ul {
-  margin: 2rem auto;
-}
-
-#lobby-page .players {
-  margin: 2rem auto;
-}
-
-#lobby-page > button {
-  margin: auto;
-}
-
-.lobby-link-info {
-  font-size: 1.2rem;
-  margin: 2rem auto 0.5rem;
+#lobby-page > * {
+  flex-grow: 1;
 }
 
 .lobby-link {
@@ -166,7 +167,6 @@ p.user {
   display: inline;
   font-weight: normal;
   transition: color 0.3s;
-  font-size: 0.95rem;
 }
 
 .lobby-link:hover {
