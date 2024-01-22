@@ -29,14 +29,14 @@ export class GolfScene extends Phaser.Scene {
   }
 
   create() {
+    this.camera = this.cameras.main;
+    this.waitingOnServer = false;
+
     this.setupCamera();
     this.setupMouseWheelZoom();
     this.setupMouseDragging();
     // this.setupKeyListeners();
     this.setupEventListeners();
-
-    this.waitingOnServer = false;
-
     this.onGameLoad(this.golfGame);
   }
 
@@ -52,7 +52,6 @@ export class GolfScene extends Phaser.Scene {
   }
 
   setupCamera() {
-    this.camera = this.cameras.main;
     this.camera.setBackgroundColor(BG_COLOR);
 
     this.cameraBounds = {
@@ -80,7 +79,7 @@ export class GolfScene extends Phaser.Scene {
     this.dragStartX = 0;
     this.dragStartY = 0;
 
-    const dragSpeed = 1;
+    const baseDragSpeed = 1;
 
     this.input.on('pointerdown', pointer => {
       this.isDragging = true;
@@ -94,8 +93,11 @@ export class GolfScene extends Phaser.Scene {
 
     this.input.on('pointermove', pointer => {
       if (this.isDragging) {
-        const dragX = (pointer.x - this.dragStartX) * dragSpeed;
-        const dragY = (pointer.y - this.dragStartY) * dragSpeed;
+        const zoomFactor = this.camera.zoom;
+        const adjustedDragSpeed = baseDragSpeed / zoomFactor;
+
+        const dragX = (pointer.x - this.dragStartX) * adjustedDragSpeed;
+        const dragY = (pointer.y - this.dragStartY) * adjustedDragSpeed;
         this.camera.scrollX = Phaser.Math.Clamp(
           this.camera.scrollX - dragX,
           this.cameraBounds.minX,
