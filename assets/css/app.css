@@ -9,9 +9,15 @@ body {
   height: 100%;
   background-color: #f8f8f8;
   color: #333;
-  font-family: monospace;
-  font-size: larger;
+  /* font-family: monospace;
+  font-size: larger; */
+  font-family: sans-serif;
 }
+
+/* :root {
+  --primary-color: #5b88bd;
+  --secondary-color: #f4f4f4;
+} */
 
 header {
   background-color: #e0e0e0;

@@ -14,6 +14,10 @@ hooks.GameCanvas = {
   mounted() {
     this.handleEvent("game_loaded", data => {
       console.log("game loaded", data.game);
+      if (phaserGame) {
+        // if the client drops and reconnects we need to cleanup the old canvas so we don't end up with two 
+        phaserGame.destroy(true);
+      }
       phaserGame = createPhaserGame(data.game, this.pushEvent.bind(this));
     });
 
