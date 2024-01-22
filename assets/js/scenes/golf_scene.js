@@ -30,7 +30,6 @@ export class GolfScene extends Phaser.Scene {
 
   create() {
     this.setupCamera();
-    this.setupPinchZoom();
     this.setupMouseWheelZoom();
     this.setupMouseDragging();
     // this.setupKeyListeners();
@@ -60,69 +59,6 @@ export class GolfScene extends Phaser.Scene {
       maxY: GAME_HEIGHT / 2,
     };
   }
-
-  setupPinchZoom() {
-    this.firstTouch = null;
-
-    this.input.on('pointerdown', (pointer) => {
-        if (pointer.isDown && pointer.event.touches && pointer.event.touches.length === 1) {
-            this.firstTouch = { x: pointer.x, y: pointer.y };
-        } else if (pointer.isDown && pointer.event.touches && pointer.event.touches.length === 2) {
-            this.startPinchDistance = Phaser.Math.Distance.Between(
-                pointer.event.touches[0].clientX, pointer.event.touches[0].clientY,
-                pointer.event.touches[1].clientX, pointer.event.touches[1].clientY
-            );
-            this.isPinching = true;
-        }
-    });
-
-    this.input.on('pointermove', (pointer) => {
-        if (this.isPinching && pointer.event.touches && pointer.event.touches.length === 2) {
-            const currentPinchDistance = Phaser.Math.Distance.Between(
-                pointer.event.touches[0].clientX, pointer.event.touches[0].clientY,
-                pointer.event.touches[1].clientX, pointer.event.touches[1].clientY
-            );
-            const zoomFactor = currentPinchDistance / this.startPinchDistance;
-            this.cameras.main.setZoom(this.cameras.main.zoom * zoomFactor);
-            this.startPinchDistance = currentPinchDistance;
-        }
-    });
-
-    this.input.on('pointerup', (pointer) => {
-        if (pointer.event.touches && pointer.event.touches.length < 2) {
-            this.isPinching = false;
-            this.firstTouch = null;
-        }
-    });
-}
-
-  // setupPinchZoom() {
-  //   this.input.on('pointerdown', (pointer) => {
-  //     if (pointer.isDown && pointer.event.touches && pointer.event.touches.length === 2) {
-  //       this.startPinchDistance = Phaser.Math.Distance.Between(
-  //         pointer.event.touches[0].clientX, pointer.event.touches[0].clientY,
-  //         pointer.event.touches[1].clientX, pointer.event.touches[1].clientY
-  //       );
-  //       this.isPinching = true;
-  //     }
-  //   });
-
-  //   this.input.on('pointermove', (pointer) => {
-  //     if (this.isPinching && pointer.event.touches && pointer.event.touches.length === 2) {
-  //       const currentPinchDistance = Phaser.Math.Distance.Between(
-  //         pointer.event.touches[0].clientX, pointer.event.touches[0].clientY,
-  //         pointer.event.touches[1].clientX, pointer.event.touches[1].clientY
-  //       );
-  //       const zoomFactor = currentPinchDistance / this.startPinchDistance;
-  //       this.cameras.main.setZoom(this.cameras.main.zoom * zoomFactor);
-  //       this.startPinchDistance = currentPinchDistance;
-  //     }
-  //   });
-
-  //   this.input.on('pointerup', () => {
-  //     this.isPinching = false;
-  //   });
-  // }
 
   setupMouseWheelZoom() {
     const zoomFactor = 0.1;
@@ -584,7 +520,6 @@ export class GolfScene extends Phaser.Scene {
 
     handCardImg.x = this.cards.held.x;
     handCardImg.y = this.cards.held.y;
-    // handCardImg.angle = this.cards.held.angle;
 
     this.children.bringToTop(tableImg);
     this.children.bringToTop(handCardImg);
@@ -593,12 +528,8 @@ export class GolfScene extends Phaser.Scene {
       targets: handCardImg,
       x: hcX,
       y: hcY,
-      // angle: 0,
       duration: 750,
       ease: "Quad.easeInOut",
-      // onStart: () => {
-      //   setTimeout(() => this.wiggleCard(handCardImg), 400);
-      // },
     });
 
     this.tweens.add({
@@ -766,8 +697,8 @@ function makePlayable(cardImg, callback) {
   cardImg.setInteractive({ cursor: "pointer" });
   cardImg.off("pointerdown");
   cardImg.on("pointerdown", () => {
-    cardImg.setTint(0xffaaff)
-    callback(cardImg)
+    cardImg.setTint(0xffaaff);
+    callback(cardImg);
   });
 }
 

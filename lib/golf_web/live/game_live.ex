@@ -78,7 +78,7 @@ defmodule GolfWeb.GameLive do
         id="chat-form-input"
         name="text"
         value=""
-        placeholder="Type chat message here..."
+        placeholder="Type here..."
         required
       />
       <.button>Submit</.button>

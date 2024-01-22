@@ -42,10 +42,7 @@ defmodule Golf.Games do
   end
 
   def current_round(%Game{rounds: [round | _]}), do: round
-
   def current_round(_), do: nil
-
-  # defguardp rounds_full(game) when length(game.rounds) > length(game.players)
 
   def current_state(%Game{rounds: [round | _]} = game)
       when round.state == :round_over and length(game.rounds) > length(game.players) do
@@ -53,7 +50,6 @@ defmodule Golf.Games do
   end
 
   def current_state(%Game{rounds: [round | _]}), do: round.state
-
   def current_state(%Game{}), do: :no_round
 
   def can_act?(%Game{rounds: []}, _player), do: false
@@ -74,27 +70,6 @@ defmodule Golf.Games do
 
     rem(round.turn - 1, num_players) ==
       Integer.mod(player.turn - round.first_player_index, num_players)
-  end
-
-  def get_hand(hands, player_id) do
-    id_str = Integer.to_string(player_id)
-    hands[id_str]
-  end
-
-  defp put_hand(hands, player_id, hand) do
-    id_str = Integer.to_string(player_id)
-    Map.put(hands, id_str, hand)
-  end
-
-  def update_hand(hands, player_id, update_fn) do
-    id_str = Integer.to_string(player_id)
-
-    hand =
-      hands[id_str]
-      |> update_fn.()
-
-    hands = Map.put(hands, id_str, hand)
-    {hands, hand}
   end
 
   def new_round(%Game{} = game) do
@@ -129,6 +104,27 @@ defmodule Golf.Games do
 
   defp player_str_ids(players) do
     Enum.map(players, fn p -> Integer.to_string(p.id) end)
+  end
+
+  def get_hand(hands, player_id) do
+    id_str = Integer.to_string(player_id)
+    hands[id_str]
+  end
+
+  defp put_hand(hands, player_id, hand) do
+    id_str = Integer.to_string(player_id)
+    Map.put(hands, id_str, hand)
+  end
+
+  def update_hand(hands, player_id, update_fn) do
+    id_str = Integer.to_string(player_id)
+
+    hand =
+      hands[id_str]
+      |> update_fn.()
+
+    hands = Map.put(hands, id_str, hand)
+    {hands, hand}
   end
 
   defp next_first_player_index(game) do

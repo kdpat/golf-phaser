@@ -45,9 +45,29 @@ header a:hover {
 #flash-info,
 #flash-error {
   cursor: pointer;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
 }
 
-h2 {
+#flash-info {
+  background-color: #d9edf7;
+  color: #31708f;
+}
+
+#flash-error {
+  background-color: #f2dede;
+  color: #a94442;
+}
+
+#flash-info:hover,
+#flash-error:hover {
+  background-color: #e0e0e0;
+}
+
+h2, h3, h4 {
   font-size: 1.5rem;
   color: #4a4a4a;
 }
@@ -125,6 +145,47 @@ p.user {
   margin: auto;
 }
 
+.lobby-link-info {
+  font-size: 1.2rem;
+  margin: 2rem auto 0.5rem;
+}
+
+.lobby-link {
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  padding: 0.2rem 0;
+  display: inline;
+  font-weight: normal;
+  transition: color 0.3s;
+  font-size: 0.95rem;
+}
+
+.lobby-link:hover {
+  color: #0056b3;
+}
+
+.copied-notification {
+  position: relative;
+}
+
+.copied-notification::after {
+  content: 'Copied!';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  z-index: 1000;
+}
+
 #game-page {
   display: flex;
   /* height: calc(100vh - 1.5rem); */
@@ -165,26 +226,28 @@ p.user {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
-  margin: 0 auto;
+  margin: 0.25rem auto 0;
   padding: 5px 50px;
   min-height: 3rem;
 }
 
 .round-scores li {
-  border-bottom: 1px solid #e0e0e0;
   list-style-type: none;
   font-size: 0.85rem;
   margin-bottom: 0.2rem;
 }
 
-.round-scores li:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-}
-
 .round-scores li h4 {
   color: #007bff;
   font-size: 1rem;
+}
+
+.player-scores {
+  display: flex;
+}
+
+.player-score {
+  margin: 0 0.5rem;
 }
 
 button#reset-camera {
@@ -220,7 +283,6 @@ button#reset-camera {
 
 #chat-form {
   display: flex;
-  justify-content: center;
   margin-top: 0.2rem;
 }
 
@@ -323,13 +385,9 @@ button#reset-camera {
     display: none;
   }
 
-  /* button#reset-camera {
-    margin: 0.25rem auto 0.5rem;
-  }
-
   .round-scores {
-    margin: 0.25rem auto 0;
-  } */
+    max-height: 10vh;
+  }
 
   #chat {
     margin: auto;
@@ -338,12 +396,4 @@ button#reset-camera {
   #chat-messages {
     max-height: 12vh;
   }
-
-  /* button {
-    padding: 0.25rem 0.5rem;
-  }
-
-  input[type="text"] {
-    padding: 0.25rem;
-  } */
 }

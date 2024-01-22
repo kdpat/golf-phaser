@@ -53,6 +53,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  const copyToClipboardAndNotify = async (linkElement) => {
+    try {
+      await navigator.clipboard.writeText(linkElement.textContent || linkElement.innerText);
+      linkElement.classList.add('copied-notification');
+      setTimeout(() => { linkElement.classList.remove('copied-notification'); }, 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
+  };
+
+  // copy to clipboard when click .lobby-link
+  const lobbyLinks = document.querySelectorAll('.lobby-link');
+  lobbyLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      copyToClipboardAndNotify(link);
+    });
+  });
 });
 
 // clear chat after submit

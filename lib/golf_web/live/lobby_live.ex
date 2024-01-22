@@ -7,6 +7,9 @@ defmodule GolfWeb.LobbyLive do
     <div id="lobby-page">
       <h2>Lobby <%= @id %></h2>
 
+      <p class="lobby-link-info">Send this link to invite players:</p>
+      <div class="lobby-link"><%= @join_url %></div>
+
       <div class="players">
         <h4>Players</h4>
         <ul id="players-list" phx-update="stream">
@@ -33,6 +36,7 @@ defmodule GolfWeb.LobbyLive do
   @impl true
   def mount(%{"id" => id}, session, socket) do
     user = Golf.Users.get_user_by_session_id(session["session_id"])
+    join_url = "#{GolfWeb.Endpoint.url()}/lobby/join/#{id}"
 
     if connected?(socket) do
       send(self(), {:load_lobby, id})
@@ -41,7 +45,15 @@ defmodule GolfWeb.LobbyLive do
 
     {:ok,
      socket
-     |> assign(page_title: "Lobby", id: id, user: user, lobby: nil, host?: nil, game_exists?: nil)
+     |> assign(
+       page_title: "Lobby",
+       id: id,
+       user: user,
+       join_url: join_url,
+       lobby: nil,
+       host?: nil,
+       game_exists?: nil
+     )
      |> stream(:users, [])}
   end
 
