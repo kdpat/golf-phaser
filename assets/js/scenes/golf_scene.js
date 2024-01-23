@@ -21,6 +21,7 @@ export class GolfScene extends Phaser.Scene {
     };
 
     this.playerTexts = {};
+    this.roundOverText = null;
   }
 
   init(data) {
@@ -263,6 +264,11 @@ export class GolfScene extends Phaser.Scene {
     if (game.userIsHost && game.state === "round_over") {
       this.createNextRoundButton();
     }
+
+    if (game.state === "round_over") {
+      const winner = this.findWinner();
+      this.addRoundOverText(winner.user.name);
+    }
   }
 
   onRoundStart(game) {
@@ -274,6 +280,10 @@ export class GolfScene extends Phaser.Scene {
     Object.values(this.cards.hands).forEach(hand => {
       hand.forEach(cardImg => cardImg.destroy());
     });
+
+    if (this.roundOverText) {
+      this.roundOverText.destroy();
+    }
 
     this.cards.deck.x = GAME_WIDTH / 2;
 
@@ -362,10 +372,29 @@ export class GolfScene extends Phaser.Scene {
         break;
     }
 
-    if (game.userIsHost
-      && game.state === "round_over"
-      && oldState !== "round_over") {
-      this.createNextRoundButton();
+    const justRoundOver = game.state === "round_over" && oldState !== "round_over";
+
+    if (justRoundOver) {
+      confetti({
+        particleCount: 400,
+        spread: 75,
+        origin: { y: 0.7 }
+      });
+
+      if (game.userIsHost) {
+        this.createNextRoundButton();
+      }
+
+      const winner = this.findWinner();
+      this.addRoundOverText(winner.user.name);
+    }
+
+    if (game.state == "game_over" && oldState !== "game_over") {
+      confetti({
+        particleCount: 400,
+        spread: 75,
+        origin: { y: 0.7 }
+      });
     }
 
     this.updatePlayerTexts();
@@ -681,6 +710,45 @@ export class GolfScene extends Phaser.Scene {
     this.input.setDefaultCursor('default');
   }
 
+  addRoundOverText(playerName) {
+    let message = playerName + " won!";
+    let textStyle = {
+        font: "bold 64px sans-serif",
+        fill: "#fff",
+        stroke: '#000000',
+        strokeThickness: 8,
+        shadow: {
+            offsetX: 3,
+            offsetY: 3,
+            color: '#000',
+            blur: 10,
+            stroke: true,
+            fill: true
+        }
+    };
+
+    let text = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, message, textStyle);
+    text.setOrigin(0.5, 0.5);
+
+    let canvas = text.canvas;
+    let context = canvas.getContext('2d');
+    let gradient = context.createLinearGradient(0, 0, canvas.width, 0);
+    gradient.addColorStop(0, 'lightgreen');
+    gradient.addColorStop(0.5, 'yellow');
+    gradient.addColorStop(1, 'cyan');
+    text.setFill(gradient);
+
+    text.setScale(0.1);
+    this.tweens.add({
+        targets: text,
+        scale: 1,
+        ease: 'Elastic.Out',
+        duration: 1500
+    });
+
+    this.roundOverText = text;
+}
+
   wiggleCard(cardImg, duration = 75) {
     return this.tweens.add({
       targets: cardImg,
@@ -695,6 +763,11 @@ export class GolfScene extends Phaser.Scene {
 
   isPlayable(cardPlace) {
     return this.golfGame.playableCards.includes(cardPlace);
+  }
+
+  findWinner() {
+    const sortedPlayers = sortByScore(this.golfGame.players);
+    return sortedPlayers && sortedPlayers[0];
   }
 
   makePlayable(cardImg, callback) {
@@ -725,6 +798,10 @@ function playerColor(player) {
 
 function rotate(arr, n) {
   return arr.slice(n).concat(arr.slice(0, n));
+}
+
+function sortByScore(player) {
+  return [...player].sort((p1, p2) => p1.score - p2.score);
 }
 
 // update() {

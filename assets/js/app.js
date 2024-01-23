@@ -18,7 +18,7 @@ const hooks = {};
 hooks.GameCanvas = {
   mounted() {
     this.handleEvent("game_loaded", data => {
-      console.log("game loaded", data.game, phaserGame);
+      console.log("game loaded", data.game);
       if (phaserGame) {
         // if the client drops and reconnects we need to cleanup the old canvas so we don't end up with two 
         phaserGame.destroy(true);
@@ -27,12 +27,12 @@ hooks.GameCanvas = {
     });
 
     this.handleEvent("round_started", data => {
-      console.log("round started", data, phaserGame);
+      console.log("round started", data);
       EMITTER.emit("round_started", data.game);
     });
 
     this.handleEvent("game_event", data => {
-      console.log("game event", data, phaserGame);
+      console.log("game event", data);
       EMITTER.emit("game_event", data.game, data.event);
     });
   }
