@@ -11,6 +11,7 @@ defmodule GolfWeb.GameLive do
       <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
       <div id="game-info" class={@game_info_class}>
         <h2 class="game-title">Game <%= @game_id %></h2>
+        <.total_scores_table scores={@total_scores} />
         <ul class="round-scores">
           <%= for {round_scores, i} <- @scores |> Enum.reverse() |> Enum.with_index() |> Enum.reverse() do %>
             <li>
@@ -35,6 +36,27 @@ defmodule GolfWeb.GameLive do
       </div>
       <div id="toggle-sidebar" phx-click="toggle_sidebar"></div>
     </div>
+    """
+  end
+
+  def total_scores_table(assigns) do
+    ~H"""
+    <table class="total-scores-table">
+      <thead>
+        <tr>
+          <th :for={player <- @scores} class={"player-score turn-#{player.turn + 1}"}>
+            <%= player.user.name %>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td :for={player <- @scores}>
+            <%= player.total_score %>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     """
   end
 
@@ -100,7 +122,8 @@ defmodule GolfWeb.GameLive do
        game_id: game_id,
        game_info_class: "active",
        game: nil,
-       scores: []
+       scores: [],
+       total_scores: []
      )
      |> stream(:chat_messages, [])}
   end
@@ -117,11 +140,12 @@ defmodule GolfWeb.GameLive do
       game ->
         Golf.subscribe!(topic(game.id))
         data = GameData.new(game, socket.assigns.user)
-        scores = Games.scores(game)
+        round_scores = Games.round_scores(game)
+        total_scores = Games.total_scores(game) |> dbg()
 
         {:noreply,
          socket
-         |> assign(game: game, scores: scores)
+         |> assign(game: game, scores: round_scores, total_scores: total_scores)
          |> push_event("game_loaded", %{"game" => data})}
     end
   end
@@ -139,21 +163,23 @@ defmodule GolfWeb.GameLive do
   @impl true
   def handle_info({:round_started, game}, socket) do
     data = GameData.new(game, socket.assigns.user)
-    scores = Games.scores(game)
+    scores = Games.round_scores(game)
+    total_scores = Games.total_scores(game)
 
     {:noreply,
      socket
-     |> assign(game: game, scores: scores)
+     |> assign(game: game, scores: scores, total_scores: total_scores)
      |> push_event("round_started", %{"game" => data})}
   end
 
   @impl true
   def handle_info({:game_event, game, event}, socket) do
     data = GameData.new(game, socket.assigns.user)
-    scores = Games.scores(game)
+    scores = Games.round_scores(game)
+    total_scores = Games.total_scores(game)
 
     {:noreply,
-     assign(socket, game: game, scores: scores)
+     assign(socket, game: game, scores: scores, total_scores: total_scores)
      |> push_event("game_event", %{"game" => data, "event" => event})}
   end
 

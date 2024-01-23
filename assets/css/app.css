@@ -231,6 +231,39 @@ input[name="id"]:focus {
   overflow: hidden;
 }
 
+.total-scores-table {
+  margin: 0.5rem auto 0;
+  text-align: center;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border-collapse: collapse;
+}
+
+.total-scores-table thead {
+  background-color: #e0e0e0;
+}
+
+.total-scores-table th, 
+.total-scores-table td {
+  padding: 0.25rem 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.total-scores-table th {
+  color: #333;
+  font-weight: bold;
+}
+
+.total-scores-table td {
+  color: #666;
+}
+
+.total-scores-table tr:last-child td {
+  border-bottom: none;
+}
+
 .round-scores {
   display: flex;
   flex-direction: column;
@@ -308,6 +341,22 @@ input[name="id"]:focus {
 
 #chat-form button {
   font-size: 16px;
+}
+
+.player-score.turn-1 {
+  color: #9c27b0;
+}
+
+.player-score.turn-2 {
+  color: #009688;
+}
+
+.player-score.turn-3 {
+  color: #ff9800;
+}
+
+.player-score.turn-4 {
+  color: #8bc34a;
 }
 
 .player-score.turn-1 > .player-name {
@@ -406,7 +455,7 @@ input[name="id"]:focus {
   }
 
   .round-scores {
-    max-height: 10vh;
+    max-height: 6vh;
   }
 
   #chat {
@@ -414,6 +463,6 @@ input[name="id"]:focus {
   }
 
   #chat-messages {
-    max-height: 12vh;
+    max-height: 10vh;
   }
 }

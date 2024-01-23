@@ -258,7 +258,7 @@ export class GolfScene extends Phaser.Scene {
     }
 
     if (game.userIsHost && game.state === "no_round") {
-      this.createStartButton();
+      this.createNextRoundButton();
     }
 
     if (game.userIsHost && game.state === "round_over") {
@@ -266,7 +266,7 @@ export class GolfScene extends Phaser.Scene {
     }
 
     if (game.state === "round_over") {
-      const winner = this.findWinner();
+      const winner = this.findRoundWinner();
       this.addRoundOverText(winner.user.name);
     }
   }
@@ -385,7 +385,7 @@ export class GolfScene extends Phaser.Scene {
         this.createNextRoundButton();
       }
 
-      const winner = this.findWinner();
+      const winner = this.findRoundWinner();
       this.addRoundOverText(winner.user.name);
     }
 
@@ -395,6 +395,9 @@ export class GolfScene extends Phaser.Scene {
         spread: 75,
         origin: { y: 0.7 }
       });
+
+      const winner = this.findGameWinner();
+      this.addRoundOverText(winner.user.name);
     }
 
     this.updatePlayerTexts();
@@ -622,47 +625,6 @@ export class GolfScene extends Phaser.Scene {
 
   // ui
 
-  createStartButton() {
-    const width = 300;
-    const height = 100;
-    const radius = 10;
-    const bgColor = 0x0069d9;
-    const textColor = '#ffffff';
-    const bgX = GAME_WIDTH / 2 - width / 2;
-    const bgY = GAME_HEIGHT - width / 2 - CARD_HEIGHT / 2 - 4;
-
-    this.startButton = {};
-
-    this.startButton.background = this.add.graphics({ x: bgX, y: bgY });
-    this.startButton.background.fillStyle(bgColor, 1);
-    this.startButton.background.fillRoundedRect(0, 0, width, height, radius);
-    this.startButton.background.setInteractive(
-      new Phaser.Geom.Rectangle(0, 0, width, height),
-      Phaser.Geom.Rectangle.Contains
-    );
-
-    this.startButton.text = this.add.text(GAME_WIDTH / 2, bgY + height / 2, 'DEAL CARDS', {
-      font: '42px sans-serif',
-      fill: textColor
-    }).setOrigin(0.5);
-
-    this.startButton.background.on('pointerdown', () => this.pushStartRound());
-
-    this.startButton.background.on('pointerover', () => {
-      this.input.setDefaultCursor('pointer');
-      this.startButton.background.clear();
-      this.startButton.background.fillStyle(0x005cbf, 1);
-      this.startButton.background.fillRoundedRect(0, 0, width, height, radius);
-    });
-
-    this.startButton.background.on('pointerout', () => {
-      this.input.setDefaultCursor('default');
-      this.startButton.background.clear();
-      this.startButton.background.fillStyle(bgColor, 1);
-      this.startButton.background.fillRoundedRect(0, 0, width, height, radius);
-    });
-  }
-
   createNextRoundButton() {
     const width = 300;
     const height = 100;
@@ -713,18 +675,18 @@ export class GolfScene extends Phaser.Scene {
   addRoundOverText(playerName) {
     let message = playerName + " won!";
     let textStyle = {
-        font: "bold 64px sans-serif",
-        fill: "#fff",
-        stroke: '#000000',
-        strokeThickness: 8,
-        shadow: {
-            offsetX: 3,
-            offsetY: 3,
-            color: '#000',
-            blur: 10,
-            stroke: true,
-            fill: true
-        }
+      font: "bold 64px sans-serif",
+      fill: "#fff",
+      stroke: '#000000',
+      strokeThickness: 8,
+      shadow: {
+        offsetX: 3,
+        offsetY: 3,
+        color: '#000',
+        blur: 10,
+        stroke: true,
+        fill: true
+      }
     };
 
     let text = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, message, textStyle);
@@ -740,14 +702,14 @@ export class GolfScene extends Phaser.Scene {
 
     text.setScale(0.1);
     this.tweens.add({
-        targets: text,
-        scale: 1,
-        ease: 'Elastic.Out',
-        duration: 1500
+      targets: text,
+      scale: 1,
+      ease: 'Elastic.Out',
+      duration: 1500
     });
 
     this.roundOverText = text;
-}
+  }
 
   wiggleCard(cardImg, duration = 75) {
     return this.tweens.add({
@@ -765,8 +727,13 @@ export class GolfScene extends Phaser.Scene {
     return this.golfGame.playableCards.includes(cardPlace);
   }
 
-  findWinner() {
+  findRoundWinner() {
     const sortedPlayers = sortByScore(this.golfGame.players);
+    return sortedPlayers && sortedPlayers[0];
+  }
+
+  findGameWinner() {
+    const sortedPlayers = [...this.golfGame.players].sort((p1, p2) => p1.score - p2.score);
     return sortedPlayers && sortedPlayers[0];
   }
 

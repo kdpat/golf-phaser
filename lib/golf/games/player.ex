@@ -3,7 +3,7 @@ defmodule Golf.Games.Player do
   import Ecto.Changeset
 
   @derive {Jason.Encoder,
-           only: [:id, :turn, :user, :hand, :held_card, :score, :position, :can_act?]}
+           only: [:id, :turn, :user, :hand, :held_card, :score, :total_score, :position, :can_act?]}
   schema "players" do
     field :turn, :integer
 
@@ -16,6 +16,7 @@ defmodule Golf.Games.Player do
     field :hand, {:array, :map}, virtual: true
     field :held_card, :string, virtual: true
     field :score, :integer, virtual: true
+    field :total_score, :integer, virtual: true
     field :position, :string, virtual: true
     field :can_act?, :boolean, virtual: true
   end

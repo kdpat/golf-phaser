@@ -322,7 +322,25 @@ defmodule Golf.Games do
     }
   end
 
-  def scores(%Game{rounds: []} = game) do
+  def total_scores(%Game{rounds: []} = game) do
+    Enum.map(game.players, &Map.put(&1, :total_score, 0))
+  end
+
+  def total_scores(game) do
+    game.players
+    |> Enum.map(fn player ->
+      score =
+        Enum.reduce(game.rounds, 0, fn round, acc ->
+          hand = get_hand(round.hands, player.id)
+          acc + score(hand)
+        end)
+
+      Map.put(player, :total_score, score)
+    end)
+    |> Enum.sort(fn p1, p2 -> p1.total_score < p2.total_score end)
+  end
+
+  def round_scores(%Game{rounds: []} = game) do
     # if there are no rounds, give each player a score of 0
     [
       Enum.map(game.players, &Map.put(&1, :score, 0))
@@ -330,7 +348,7 @@ defmodule Golf.Games do
     ]
   end
 
-  def scores(game) do
+  def round_scores(game) do
     Enum.map(game.rounds, &put_scores(&1, game.players))
   end
 
