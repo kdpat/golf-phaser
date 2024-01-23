@@ -672,6 +672,47 @@ export class GolfScene extends Phaser.Scene {
     this.input.setDefaultCursor('default');
   }
 
+  // createNextGameButton() {
+  //   const width = 300;
+  //   const height = 100;
+  //   const radius = 10;
+  //   const bgColor = 0x0069d9;
+  //   const textColor = '#ffffff';
+  //   const bgX = GAME_WIDTH / 2 - width / 2;
+  //   const bgY = GAME_HEIGHT - width / 2 - CARD_HEIGHT / 2 - 4;
+
+  //   this.nextGameButton = {};
+
+  //   this.nextGameButton.background = this.add.graphics({ x: bgX, y: bgY });
+  //   this.nextGameButton.background.fillStyle(bgColor, 1);
+  //   this.nextGameButton.background.fillRoundedRect(0, 0, width, height, radius);
+  //   this.nextGameButton.background.setInteractive(
+  //     new Phaser.Geom.Rectangle(0, 0, width, height),
+  //     Phaser.Geom.Rectangle.Contains
+  //   );
+
+  //   this.nextGameButton.text = this.add.text(GAME_WIDTH / 2, bgY + height / 2, 'DEAL CARDS', {
+  //     font: '42px sans-serif',
+  //     fill: textColor
+  //   }).setOrigin(0.5);
+
+  //   this.nextGameButton.background.on('pointerdown', () => this.pushStartRound());
+
+  //   this.nextGameButton.background.on('pointerover', () => {
+  //     this.input.setDefaultCursor('pointer');
+  //     this.nextGameButton.background.clear();
+  //     this.nextGameButton.background.fillStyle(0x005cbf, 1);
+  //     this.nextGameButton.background.fillRoundedRect(0, 0, width, height, radius);
+  //   });
+
+  //   this.nextGameButton.background.on('pointerout', () => {
+  //     this.input.setDefaultCursor('default');
+  //     this.nextGameButton.background.clear();
+  //     this.nextGameButton.background.fillStyle(bgColor, 1);
+  //     this.nextGameButton.background.fillRoundedRect(0, 0, width, height, radius);
+  //   });
+  // }
+
   addRoundOverText(playerName) {
     let message = playerName + " won!";
     let textStyle = {

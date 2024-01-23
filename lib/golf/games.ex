@@ -355,11 +355,15 @@ defmodule Golf.Games do
   def put_scores(round, players) do
     players
     |> Enum.map(fn p -> Map.put(p, :score, player_score(round.hands, p.id)) end)
-    |> double_set_player(round)
+    |> double_set_player_score(round)
     |> Enum.sort(fn p1, p2 -> p1.score < p2.score end)
   end
 
-  def double_set_player(players, round) when round.state == :round_over do
+  @doc """
+  If a player flips all their cards first and then loses they are "set".
+  If a player is set, their score is doubled.
+  """
+  def double_set_player_score(players, round) when round.state == :round_over do
     Enum.map(players, fn p ->
       if p.id == round.first_player_flipped_id and p.score > 0 and any_lower_score?(players, p) do
         Map.update!(p, :score, &(&1 * 2))
@@ -369,12 +373,12 @@ defmodule Golf.Games do
     end)
   end
 
-  def double_set_player(players, _), do: players
+  def double_set_player_score(players, _), do: players
 
   def any_lower_score?(players, player) do
-    Enum.any?(players, fn p ->
-      p.id != player.id and p.score < player.score
-    end)
+    players
+    |> Enum.filter(&(&1.id == player.id))
+    |> Enum.any?(&(&1.score < player.score))
   end
 
   def player_score(hands, player_id) do
