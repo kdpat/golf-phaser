@@ -75,9 +75,20 @@ header a:hover {
   background-color: #e0e0e0;
 }
 
-h2, h3, h4 {
-  font-size: 1.5rem;
+h1, h2, h3, h4 {
   color: #4a4a4a;
+}
+
+h2 {
+  font-size: 38px;
+}
+
+h3 {
+  font-size: 30px;
+}
+
+h4 {
+  font-size: 20px;
 }
 
 button {

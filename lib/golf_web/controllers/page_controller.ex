@@ -10,13 +10,18 @@ defmodule GolfWeb.PageController do
          {:started, false} <- {:started, Golf.GamesDb.game_exists?(id)},
          lobby <- Golf.Lobbies.get_lobby(id),
          {:exists, true} <- {:exists, is_struct(lobby)},
-         user <- conn.assigns.user,
-         {:ok, lobby} <- Golf.Lobbies.add_lobby_user(lobby, user) do
-      Golf.broadcast!("lobby:#{id}", {:user_joined, lobby, user})
+         user <- conn.assigns.user do
+      case Golf.Lobbies.add_lobby_user(lobby, user) do
+        {:ok, lobby} ->
+          Golf.broadcast!("lobby:#{id}", {:user_joined, lobby, user})
 
-      conn
-      |> put_flash(:info, "Joined lobby #{id}.")
-      |> redirect(to: ~p"/lobby/#{id}")
+          conn
+          |> put_flash(:info, "Joined lobby #{id}.")
+          |> redirect(to: ~p"/lobby/#{id}")
+
+        _ ->
+          redirect(conn, to: ~p"/lobby/#{id}")
+      end
     else
       {:started, _} ->
         conn
@@ -28,7 +33,8 @@ defmodule GolfWeb.PageController do
         |> put_flash(:error, "Game #{id} not found")
         |> redirect(to: ~p"/")
 
-      _ ->
+      err ->
+        dbg(err)
         redirect(conn, to: ~p"/")
     end
   end

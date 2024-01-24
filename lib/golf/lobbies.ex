@@ -31,7 +31,7 @@ defmodule Golf.Lobbies do
 
   def create_lobby(id, host) do
     %Lobby{id: id, host_id: host.id, users: [host]}
-    |> Lobby.changeset(%{})
+    |> Lobby.changeset()
     |> Repo.insert!()
   end
 
