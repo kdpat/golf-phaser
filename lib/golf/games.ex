@@ -322,6 +322,22 @@ defmodule Golf.Games do
     }
   end
 
+  def action_at(state, "hand") when state in [:flip_2, :flip], do: :flip
+  def action_at(:take, "table"), do: :take_table
+  def action_at(:take, "deck"), do: :take_deck
+  def action_at(:hold, "table"), do: :discard
+  def action_at(:hold, "held"), do: :discard
+  def action_at(:hold, "hand"), do: :swap
+
+  def find_player_by_user_id(players, user_id) do
+    Enum.find(players, fn p -> p.user_id == user_id end)
+  end
+
+  def find_user_turn(players, user_id) do
+    player = find_player_by_user_id(players, user_id)
+    player && player.turn + 1
+  end
+
   def total_scores(%Game{rounds: []} = game) do
     Enum.map(game.players, &Map.put(&1, :total_score, 0))
   end

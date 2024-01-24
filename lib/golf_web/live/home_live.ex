@@ -54,7 +54,7 @@ defmodule GolfWeb.HomeLive do
 
   @impl true
   def handle_event("join_lobby", %{"id" => id}, socket) do
-    id = id |> String.trim() |> String.downcase()
+    id = String.trim(id) |> String.downcase()
 
     case Golf.Lobbies.get_lobby(id) do
       nil ->

@@ -23,4 +23,9 @@ defmodule Golf.Chat do
   def format_chat_time(dt) do
     Calendar.strftime(dt, "%y/%m/%d %H:%m:%S")
   end
+
+  def put_player_turn(chat_message, players) do
+    turn = Golf.Games.find_user_turn(players, chat_message.user_id) || 0
+    Map.put(chat_message, :turn, turn)
+  end
 end

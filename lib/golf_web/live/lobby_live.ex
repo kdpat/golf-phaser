@@ -1,16 +1,13 @@
 defmodule GolfWeb.LobbyLive do
   use GolfWeb, :live_view
 
+  import GolfWeb.AppComponents, only: [chat: 1]
+
   @impl true
   def render(assigns) do
     ~H"""
     <div id="lobby-page">
-      <h2>Lobby <%= @id %></h2>
-
-      <div>
-        <p class="lobby-link-info">Send this link to invite players:</p>
-        <div class="lobby-link"><%= @join_url %></div>
-      </div>
+      <h2>Lobby <span class="game-id"><%= @id %></span></h2>
 
       <div class="players">
         <h4>Players</h4>
@@ -21,11 +18,18 @@ defmodule GolfWeb.LobbyLive do
         </ul>
       </div>
 
+      <div class="lobby-link-info">
+        <p>Send the following link to invite players.</p>
+        <p>Click the link to copy it to your clipboard.</p>
+        <div class="lobby-link"><%= @join_url %></div>
+        <p>Or, they can enter game code <span class="game-id"><%= @id %></span> on the home page.</p>
+      </div>
+
       <div>
         <!--
-      @game_exists? will be nil on mount, and true or false after the db is checked.
-      If it's nil (the data isn't loaded yet) we don't want to show it, so explicitly check for false.
-      -->
+        @game_exists? will be nil on mount, and true or false after the db is checked.
+        If it's nil (the data isn't loaded yet) we don't want to show it, so explicitly check for false.
+        -->
         <button :if={@host? && @game_exists? == false} phx-click="start_game">
           Start Game
         </button>
@@ -34,6 +38,8 @@ defmodule GolfWeb.LobbyLive do
           Go To Game
         </button>
       </div>
+
+      <.chat messages={@streams.chat_messages} submit="submit_chat" />
 
       <.form class="username-form" for={@name_form} phx-submit="update_username">
         <.input type="text" field={@name_form[:name]} />
@@ -53,6 +59,7 @@ defmodule GolfWeb.LobbyLive do
 
     if connected?(socket) do
       send(self(), {:load_lobby, id})
+      send(self(), {:load_chat_messages, id})
       send(self(), {:load_game_exists?, id})
     end
 
@@ -68,7 +75,8 @@ defmodule GolfWeb.LobbyLive do
        game_exists?: nil,
        name_form: name_form
      )
-     |> stream(:users, [])}
+     |> stream(:users, [])
+     |> stream(:chat_messages, [])}
   end
 
   @impl true
@@ -120,6 +128,25 @@ defmodule GolfWeb.LobbyLive do
   end
 
   @impl true
+  def handle_info({:load_chat_messages, id}, socket) do
+    messages =
+      Golf.Chat.get_messages(id)
+      |> Enum.map(&Map.put(&1, :turn, 0))
+
+    # |> Enum.map(&Golf.Chat.put_player_turn(&1, socket.assigns.game.players))
+
+    Golf.subscribe!("chat:#{id}")
+    {:noreply, stream(socket, :chat_messages, messages, at: 0)}
+  end
+
+  @impl true
+  def handle_info({:new_chat_message, message}, socket) do
+    # message = Golf.Chat.put_player_turn(message, socket.assigns.game.players)
+    message = Map.put(message, :turn, 0)
+    {:noreply, stream_insert(socket, :chat_messages, message, at: 0)}
+  end
+
+  @impl true
   def handle_event("start_game", _params, socket) do
     id = socket.assigns.id
     game = Golf.GamesDb.create_game(id, socket.assigns.user, socket.assigns.lobby.users)
@@ -145,6 +172,19 @@ defmodule GolfWeb.LobbyLive do
       {:error, changeset} ->
         {:noreply, assign(socket, name_form: to_form(changeset))}
     end
+  end
+
+  @impl true
+  def handle_event("submit_chat", %{"text" => text}, socket) do
+    id = socket.assigns.id
+
+    message =
+      Golf.Chat.ChatMessage.new(id, socket.assigns.user, text)
+      |> Golf.Chat.insert_message!()
+      |> Map.update!(:inserted_at, &Golf.Chat.format_chat_time/1)
+
+    Golf.broadcast!("chat:#{id}", {:new_chat_message, message})
+    {:noreply, push_event(socket, "clear-chat-input", %{})}
   end
 
   defp topic(id), do: "lobby:#{id}"

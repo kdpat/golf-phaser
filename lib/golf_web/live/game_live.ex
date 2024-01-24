@@ -1,6 +1,8 @@
 defmodule GolfWeb.GameLive do
   use GolfWeb, :live_view
 
+  import GolfWeb.AppComponents, only: [chat: 1]
+
   alias Golf.{Games, GamesDb}
   alias Golf.Games.{Event, GameData}
 
@@ -10,7 +12,7 @@ defmodule GolfWeb.GameLive do
     <div id="game-page">
       <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
       <div id="game-info" class={@game_info_class}>
-        <h2 class="game-title">Game <%= @game_id %></h2>
+        <h2 class="game-title">Game <span class="game-id"><%= @game_id %></span></h2>
         <.total_scores_table scores={@total_scores} />
         <ul class="round-scores">
           <li :for={{round_scores, i} <- Enum.zip(@scores, length(@scores)..1)}>
@@ -34,73 +36,6 @@ defmodule GolfWeb.GameLive do
       </div>
       <div id="toggle-sidebar" phx-click="toggle_sidebar"></div>
     </div>
-    """
-  end
-
-  def total_scores_table(assigns) do
-    ~H"""
-    <table class="total-scores-table">
-      <thead>
-        <tr>
-          <th :for={player <- @scores} class={"player-score turn-#{player.turn + 1}"}>
-            <%= player.user.name %>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td :for={player <- @scores}>
-            <%= player.total_score %>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    """
-  end
-
-  def player_score(assigns) do
-    ~H"""
-    <li>
-      <p class={"player-score turn-#{@turn}"}>
-        <span class="player-name"><%= @name %></span>: <%= @score %>
-      </p>
-    </li>
-    """
-  end
-
-  def chat(assigns) do
-    ~H"""
-    <div id="chat">
-      <.chat_messages messages={@messages} />
-      <.chat_form submit={@submit} />
-    </div>
-    """
-  end
-
-  def chat_messages(assigns) do
-    ~H"""
-    <ul id="chat-messages" phx-update="stream">
-      <.chat_message :for={{id, msg} <- @messages} id={id} msg={msg} />
-    </ul>
-    """
-  end
-
-  defp chat_message(assigns) do
-    ~H"""
-    <li id={@id} class="chat-message">
-      <span class="timestamp"><%= @msg.inserted_at %></span>
-      <span class={"username turn-#{@msg.turn}"}><%= @msg.user.name %>:</span>
-      <span class="text"><%= @msg.text %></span>
-    </li>
-    """
-  end
-
-  def chat_form(assigns) do
-    ~H"""
-    <form id="chat-form" phx-submit={@submit}>
-      <.input id="chat-form-input" name="text" value="" placeholder="Type message here..." required />
-      <.button>Submit</.button>
-    </form>
     """
   end
 
@@ -152,7 +87,7 @@ defmodule GolfWeb.GameLive do
   def handle_info({:load_chat_messages, id}, socket) do
     messages =
       Golf.Chat.get_messages(id)
-      |> Enum.map(&put_turn(&1, socket.assigns.game.players))
+      |> Enum.map(&Golf.Chat.put_player_turn(&1, socket.assigns.game.players))
 
     Golf.subscribe!("chat:#{id}")
     {:noreply, stream(socket, :chat_messages, messages, at: 0)}
@@ -183,7 +118,7 @@ defmodule GolfWeb.GameLive do
 
   @impl true
   def handle_info({:new_chat_message, message}, socket) do
-    message = put_turn(message, socket.assigns.game.players)
+    message = Golf.Chat.put_player_turn(message, socket.assigns.game.players)
     {:noreply, stream_insert(socket, :chat_messages, message, at: 0)}
   end
 
@@ -223,10 +158,10 @@ defmodule GolfWeb.GameLive do
   @impl true
   def handle_event("card_click", params, socket) do
     game = socket.assigns.game
-    player = find_player_by_user_id(game.players, socket.assigns.user.id)
+    player = Games.find_player_by_user_id(game.players, socket.assigns.user.id)
 
     state = Games.current_state(game)
-    action = action_at(state, params["place"])
+    action = Games.action_at(state, params["place"])
     event = Event.new(player.id, action, params["handIndex"])
     {:ok, game} = GamesDb.handle_event(game, event)
 
@@ -236,24 +171,34 @@ defmodule GolfWeb.GameLive do
 
   defp topic(game_id), do: "game:#{game_id}"
 
-  defp action_at(state, "hand") when state in [:flip_2, :flip], do: :flip
-  defp action_at(:take, "table"), do: :take_table
-  defp action_at(:take, "deck"), do: :take_deck
-  defp action_at(:hold, "table"), do: :discard
-  defp action_at(:hold, "held"), do: :discard
-  defp action_at(:hold, "hand"), do: :swap
-
-  defp find_player_by_user_id(players, user_id) do
-    Enum.find(players, fn p -> p.user_id == user_id end)
+  def total_scores_table(assigns) do
+    ~H"""
+    <table class="total-scores-table">
+      <thead>
+        <tr>
+          <th :for={player <- @scores} class={"player-score turn-#{player.turn + 1}"}>
+            <%= player.user.name %>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td :for={player <- @scores}>
+            <%= player.total_score %>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    """
   end
 
-  defp find_user_turn(players, user_id) do
-    player = find_player_by_user_id(players, user_id)
-    player && player.turn + 1
-  end
-
-  defp put_turn(chat_message, players) do
-    turn = find_user_turn(players, chat_message.user_id) || 0
-    Map.put(chat_message, :turn, turn)
+  def player_score(assigns) do
+    ~H"""
+    <li>
+      <p class={"player-score turn-#{@turn}"}>
+        <span class="player-name"><%= @name %></span>: <%= @score %>
+      </p>
+    </li>
+    """
   end
 end

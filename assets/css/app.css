@@ -175,6 +175,14 @@ input[name="id"]:focus {
   flex-grow: 1;
 }
 
+#lobby-page #chat {
+  max-height: 24vh;
+}
+
+.lobby-link-info {
+  line-height: 1.5;
+}
+
 .lobby-link {
   color: #007bff;
   text-decoration: underline;
@@ -189,6 +197,13 @@ input[name="id"]:focus {
 
 .lobby-link:hover {
   color: #0056b3;
+}
+
+.game-id {
+  font-family: monospace;
+  font-weight: bold;
+  font-size: inherit;
+  color: #009688;
 }
 
 .copied-notification {
