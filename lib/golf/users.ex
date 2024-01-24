@@ -8,7 +8,7 @@ defmodule Golf.Users do
 
   alias Golf.Users.User
 
-  @default_username "anon"
+  @default_username "user"
   def default_username, do: @default_username
 
   def list_users do

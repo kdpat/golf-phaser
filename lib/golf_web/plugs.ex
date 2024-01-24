@@ -23,9 +23,14 @@ defmodule GolfWeb.Plugs do
   def put_user(conn, _opts) do
     case Golf.Users.get_user_by_session_id(conn.assigns.session_id) do
       nil ->
+        sess_id = conn.assigns.session_id
+
+        username =
+          "#{Golf.Users.default_username()}-#{String.slice(sess_id, 0..2) |> String.downcase()}"
+
         user_attrs = %{
-          session_id: conn.assigns.session_id,
-          name: Golf.Users.default_username()
+          session_id: sess_id,
+          name: username
         }
 
         {:ok, user} = Golf.Users.create_user(user_attrs)

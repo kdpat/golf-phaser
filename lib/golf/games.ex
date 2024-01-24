@@ -393,7 +393,8 @@ defmodule Golf.Games do
 
   def any_lower_score?(players, player) do
     players
-    |> Enum.filter(&(&1.id == player.id))
+    # |> Enum.filter(&(&1.id == player.id))
+    # |> Enum.reject(&(&1.id == player.id))
     |> Enum.any?(&(&1.score < player.score))
   end
 
