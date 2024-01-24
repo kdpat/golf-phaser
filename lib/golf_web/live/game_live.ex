@@ -13,19 +13,17 @@ defmodule GolfWeb.GameLive do
         <h2 class="game-title">Game <%= @game_id %></h2>
         <.total_scores_table scores={@total_scores} />
         <ul class="round-scores">
-          <%= for {round_scores, i} <- @scores |> Enum.reverse() |> Enum.with_index() |> Enum.reverse() do %>
-            <li>
-              <h4>Round <%= i + 1 %></h4>
-              <ul class="player-scores">
-                <.player_score
-                  :for={player <- round_scores}
-                  name={player.user.name}
-                  turn={player.turn + 1}
-                  score={player.score}
-                />
-              </ul>
-            </li>
-          <% end %>
+          <li :for={{round_scores, i} <- Enum.zip(@scores, length(@scores)..1)}>
+            <h4>Round <%= i %></h4>
+            <ul class="player-scores">
+              <.player_score
+                :for={player <- round_scores}
+                name={player.user.name}
+                turn={player.turn + 1}
+                score={player.score}
+              />
+            </ul>
+          </li>
         </ul>
         <.chat messages={@streams.chat_messages} submit="submit_chat" />
         <div id="camera-controls">

@@ -33,8 +33,7 @@ defmodule GolfWeb.PageController do
         |> put_flash(:error, "Game #{id} not found")
         |> redirect(to: ~p"/")
 
-      err ->
-        dbg(err)
+      _ ->
         redirect(conn, to: ~p"/")
     end
   end

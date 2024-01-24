@@ -35,6 +35,10 @@ hooks.GameCanvas = {
       console.log("game event", data);
       EMITTER.emit("game_event", data.game, data.event);
     });
+  },
+
+  reconnected() {
+    console.log("reconnected...");
   }
 }
 
@@ -114,11 +118,11 @@ window.addEventListener("phx:clear-chat-input", _ => {
   inputEl.value = "";
 });
 
-// set vh property
+// set vh property to scale to window.innerHeight
 let vh = window.innerHeight * 0.01;
 document.documentElement.style.setProperty("--vh", `${vh}px`);
 
-// set vh on resize
+// update vh on resize
 window.addEventListener('resize', () => {
   let vh = window.innerHeight * 0.01;
   document.documentElement.style.setProperty('--vh', `${vh}px`);
